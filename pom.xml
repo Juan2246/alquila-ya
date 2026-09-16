@@ -13,19 +13,6 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>alquilaya</name>
     <description>AlquilaYa - Sistema de Gestión de Alquileres</description>
-    <url/>
-    <licenses>
-        <license/>
-    </licenses>
-    <developers>
-        <developer/>
-    </developers>
-    <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
-    </scm>
     <properties>
         <java.version>25</java.version>
     </properties>
@@ -57,6 +44,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Base de datos en memoria: los tests corren sin depender de un PostgreSQL local -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
 
