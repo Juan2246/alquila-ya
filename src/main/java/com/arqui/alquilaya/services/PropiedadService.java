@@ -1,5 +1,6 @@
 package com.arqui.alquilaya.services;
 
+import com.arqui.alquilaya.dtos.CotizacionDTO;
 import com.arqui.alquilaya.dtos.PropiedadDTO;
 import com.arqui.alquilaya.entities.Propiedad;
 import java.math.BigDecimal;
@@ -28,4 +29,14 @@ public interface PropiedadService {
      * @return lista de propiedades que cumplen todos los filtros
      */
     public List<Propiedad> buscarConFiltros(String distrito, BigDecimal precioMin, BigDecimal precioMax, Integer capacidad);
+
+    /**
+     * Cotizador automático: calcula el precio de una estadía.
+     * Fórmula: noches × precio por noche.
+     * @param propiedadId propiedad a cotizar
+     * @param checkIn fecha de entrada (ISO, yyyy-MM-dd)
+     * @param checkOut fecha de salida (ISO, yyyy-MM-dd), posterior al check-in
+     * @return detalle de la cotización con noches y precio total
+     */
+    public CotizacionDTO cotizar(Long propiedadId, String checkIn, String checkOut);
 }

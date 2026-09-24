@@ -9,7 +9,7 @@ import com.arqui.alquilaya.repositories.FavoritoRepository;
 import com.arqui.alquilaya.services.ClienteService;
 import com.arqui.alquilaya.services.FavoritoService;
 import com.arqui.alquilaya.services.PropiedadService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,14 +20,12 @@ import java.util.List;
  * Permite a los clientes guardar propiedades de su interés.
  */
 @Service
+@RequiredArgsConstructor
 public class FavoritoServiceImpl implements FavoritoService {
 
-    @Autowired
-    FavoritoRepository favoritoRepository;
-    @Autowired
-    ClienteService clienteService;
-    @Autowired
-    PropiedadService propiedadService;
+    private final FavoritoRepository favoritoRepository;
+    private final ClienteService clienteService;
+    private final PropiedadService propiedadService;
 
     @Override
     public List<Favorito> listByClienteId(Long clienteId) {

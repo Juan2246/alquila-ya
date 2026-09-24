@@ -7,7 +7,7 @@ import com.arqui.alquilaya.exceptions.ResourceNotFoundException;
 import com.arqui.alquilaya.repositories.PagoRepository;
 import com.arqui.alquilaya.services.ContratoService;
 import com.arqui.alquilaya.services.PagoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,12 +19,11 @@ import java.util.List;
  * Utiliza BigDecimal para el monto, garantizando precisión monetaria.
  */
 @Service
+@RequiredArgsConstructor
 public class PagoServiceImpl implements PagoService {
 
-    @Autowired
-    PagoRepository pagoRepository;
-    @Autowired
-    ContratoService contratoService;
+    private final PagoRepository pagoRepository;
+    private final ContratoService contratoService;
 
     @Override
     public Pago findById(Long id) {

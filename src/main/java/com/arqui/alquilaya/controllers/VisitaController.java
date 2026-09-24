@@ -3,7 +3,7 @@ package com.arqui.alquilaya.controllers;
 import com.arqui.alquilaya.dtos.VisitaDTO;
 import com.arqui.alquilaya.entities.Visita;
 import com.arqui.alquilaya.services.VisitaService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +14,10 @@ import java.util.List;
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/alquilaya")
+@RequiredArgsConstructor
 public class VisitaController {
 
-    @Autowired
-    VisitaService visitaService;
+    private final VisitaService visitaService;
 
     /** Listar todas las visitas de un cliente. */
     @GetMapping("/visitas/cliente/{clienteId}")

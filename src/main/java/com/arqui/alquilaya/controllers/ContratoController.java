@@ -2,10 +2,8 @@ package com.arqui.alquilaya.controllers;
 
 import com.arqui.alquilaya.dtos.ContratoDTO;
 import com.arqui.alquilaya.entities.Contrato;
-import com.arqui.alquilaya.exceptions.ResourceNotFoundException;
 import com.arqui.alquilaya.services.ContratoService;
-import com.arqui.alquilaya.services.FileStorageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,13 +15,10 @@ import java.util.List;
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/alquilaya")
+@RequiredArgsConstructor
 public class ContratoController {
 
-    @Autowired
-    ContratoService contratoService;
-
-    @Autowired
-    FileStorageService fileStorageService;
+    private final ContratoService contratoService;
 
     @GetMapping("/contratos")
     public ResponseEntity<List<Contrato>> listAll() {
@@ -68,19 +63,7 @@ public class ContratoController {
             @PathVariable("contratoId") Long id,
             @RequestParam("file") MultipartFile file
     ) {
-        Contrato contrato = contratoService.findById(id);
-        if (contrato == null) {
-            throw new ResourceNotFoundException("Contrato con id: " + id + " no encontrado");
-        }
-
-        // Subir la imagen de firma
-        String rutaFirma = fileStorageService.guardarArchivo(file, "firmas");
-
-        // Actualizar el contrato con la ruta de la firma
-        contrato.setFirmaImagenUrl(rutaFirma);
-        contrato.setEstado("FIRMADO");
-        Contrato updated = contratoService.update(contrato);
-
-        return new ResponseEntity<>(updated, HttpStatus.OK);
+        Contrato firmado = contratoService.firmar(id, file);
+        return new ResponseEntity<>(firmado, HttpStatus.OK);
     }
 }

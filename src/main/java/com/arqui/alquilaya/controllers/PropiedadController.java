@@ -4,25 +4,22 @@ import com.arqui.alquilaya.dtos.CotizacionDTO;
 import com.arqui.alquilaya.dtos.PropiedadDTO;
 import com.arqui.alquilaya.entities.Propiedad;
 import com.arqui.alquilaya.services.PropiedadService;
-import jakarta.validation.ValidationException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/alquilaya")
+@RequiredArgsConstructor
 public class PropiedadController {
 
-    @Autowired
-    PropiedadService propiedadService;
+    private final PropiedadService propiedadService;
 
     /** Listar todas las propiedades disponibles. */
     @GetMapping("/propiedades")
@@ -74,28 +71,7 @@ public class PropiedadController {
             @RequestParam String checkIn,
             @RequestParam String checkOut
     ) {
-        Propiedad propiedad = propiedadService.findById(id);
-
-        LocalDate fechaCheckIn = LocalDate.parse(checkIn);
-        LocalDate fechaCheckOut = LocalDate.parse(checkOut);
-
-        if (!fechaCheckOut.isAfter(fechaCheckIn)) {
-            throw new ValidationException("La fecha de check-out debe ser posterior a la fecha de check-in");
-        }
-
-        long noches = ChronoUnit.DAYS.between(fechaCheckIn, fechaCheckOut);
-        BigDecimal precioTotal = propiedad.getPrecio().multiply(BigDecimal.valueOf(noches));
-
-        CotizacionDTO cotizacion = new CotizacionDTO(
-                propiedad.getId(),
-                propiedad.getTitulo(),
-                checkIn,
-                checkOut,
-                noches,
-                propiedad.getPrecio(),
-                precioTotal
-        );
-
+        CotizacionDTO cotizacion = propiedadService.cotizar(id, checkIn, checkOut);
         return new ResponseEntity<>(cotizacion, HttpStatus.OK);
     }
 

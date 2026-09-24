@@ -4,7 +4,7 @@ import com.arqui.alquilaya.entities.Notificacion;
 import com.arqui.alquilaya.exceptions.ResourceNotFoundException;
 import com.arqui.alquilaya.repositories.NotificacionRepository;
 import com.arqui.alquilaya.services.NotificacionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,10 +14,10 @@ import java.util.List;
  * Gestiona el envío y marcado de notificaciones como leídas para los clientes.
  */
 @Service
+@RequiredArgsConstructor
 public class NotificacionServiceImpl implements NotificacionService {
 
-    @Autowired
-    NotificacionRepository notificacionRepository;
+    private final NotificacionRepository notificacionRepository;
 
     @Override
     public List<Notificacion> listByClienteId(Long clienteId) {

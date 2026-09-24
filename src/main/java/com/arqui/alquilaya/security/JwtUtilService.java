@@ -3,6 +3,7 @@ package com.arqui.alquilaya.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -17,29 +18,37 @@ import java.util.function.Function;
  * JWT (JSON Web Token) es el mecanismo de autenticación stateless que usa la aplicación:
  * después del login, el servidor genera un token que el cliente envía en cada petición.
  * Este servicio se encarga de crear esos tokens y verificar su validez.
+ *
+ * La clave de firma y la vigencia del token se leen de la configuración
+ * (propiedades {@code jwt.secret} y {@code jwt.expiration-ms}), no del código:
+ * así cada entorno usa su propia clave sin recompilar.
  */
 @Service
 public class JwtUtilService {
 
-    // Clave secreta en Base64 para firmar los tokens. Debe mantenerse privada.
-    private static final String JWT_SIGNATURE_KEY = "QVJRVUlURUNUVVJBX0FQTElDQUNJT05FU19XRUJfVVBDX0lOR0VOSUVSSUFfU0lTVEVNQVNfREVfSU5GT1JNQUNJT04K";
+    // Clave HMAC-SHA256 con la que se firman y verifican los tokens
+    private final SecretKey signingKey;
 
-    // Tiempo de validez del token: 3 horas en milisegundos
-    private static final Long JWT_TOKEN_VALIDITY = 1000 * 60 * 60 * (long) 3;
+    // Tiempo de validez del token en milisegundos
+    private final long tokenValidityMs;
 
     /**
-     * Decodifica la clave secreta de Base64 y la convierte en una SecretKey para HMAC-SHA256.
+     * @param secret          clave secreta codificada en Base64 (jwt.secret)
+     * @param tokenValidityMs vigencia del token en milisegundos (jwt.expiration-ms)
      */
-    private SecretKey getSigningKey() {
-        byte[] decodedKey = Base64.getDecoder().decode(JWT_SIGNATURE_KEY);
-        return Keys.hmacShaKeyFor(decodedKey);
+    public JwtUtilService(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.expiration-ms}") long tokenValidityMs
+    ) {
+        this.signingKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret));
+        this.tokenValidityMs = tokenValidityMs;
     }
 
     /**
      * Extrae todos los claims (datos) contenidos en un token JWT.
      */
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
+        return Jwts.parser().verifyWith(signingKey).build().parseSignedClaims(token).getPayload();
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimsFunction) {
@@ -79,8 +88,8 @@ public class JwtUtilService {
                 .claims(claims)
                 .subject(subject)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
-                .signWith(getSigningKey(), Jwts.SIG.HS256)
+                .expiration(new Date(System.currentTimeMillis() + tokenValidityMs))
+                .signWith(signingKey, Jwts.SIG.HS256)
                 .compact();
     }
 

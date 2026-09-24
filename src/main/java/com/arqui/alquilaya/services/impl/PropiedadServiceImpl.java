@@ -1,5 +1,6 @@
 package com.arqui.alquilaya.services.impl;
 
+import com.arqui.alquilaya.dtos.CotizacionDTO;
 import com.arqui.alquilaya.dtos.PropiedadDTO;
 import com.arqui.alquilaya.entities.Comodidad;
 import com.arqui.alquilaya.entities.Propiedad;
@@ -11,12 +12,14 @@ import com.arqui.alquilaya.services.PropiedadService;
 import com.arqui.alquilaya.services.PropietarioService;
 import com.arqui.alquilaya.specifications.PropiedadSpecification;
 import jakarta.validation.ValidationException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,16 +29,14 @@ import java.util.List;
  * Incluye buscador avanzado con filtros dinámicos y cotizador automático.
  */
 @Service
+@RequiredArgsConstructor
 public class PropiedadServiceImpl implements PropiedadService {
 
-    @Autowired
-    PropiedadRepository propiedadRepository;
+    private final PropiedadRepository propiedadRepository;
 
-    @Autowired
-    PropietarioService propietarioService;
+    private final PropietarioService propietarioService;
 
-    @Autowired
-    ComodidadRepository comodidadRepository;
+    private final ComodidadRepository comodidadRepository;
 
     /**
      * Guarda una propiedad en la base de datos después de validar campos obligatorios.
@@ -83,6 +84,36 @@ public class PropiedadServiceImpl implements PropiedadService {
                 .and(PropiedadSpecification.porPrecioMaximo(precioMax))
                 .and(PropiedadSpecification.porCapacidadMinima(capacidad));
         return propiedadRepository.findAll(spec);
+    }
+
+    /**
+     * Cotizador automático.
+     * Recibe las fechas de un viaje y calcula el precio total a pagar.
+     * Fórmula: noches × precio por noche.
+     */
+    @Override
+    public CotizacionDTO cotizar(Long propiedadId, String checkIn, String checkOut) {
+        Propiedad propiedad = findById(propiedadId);
+
+        LocalDate fechaCheckIn = LocalDate.parse(checkIn);
+        LocalDate fechaCheckOut = LocalDate.parse(checkOut);
+
+        if (!fechaCheckOut.isAfter(fechaCheckIn)) {
+            throw new ValidationException("La fecha de check-out debe ser posterior a la fecha de check-in");
+        }
+
+        long noches = ChronoUnit.DAYS.between(fechaCheckIn, fechaCheckOut);
+        BigDecimal precioTotal = propiedad.getPrecio().multiply(BigDecimal.valueOf(noches));
+
+        return new CotizacionDTO(
+                propiedad.getId(),
+                propiedad.getTitulo(),
+                checkIn,
+                checkOut,
+                noches,
+                propiedad.getPrecio(),
+                precioTotal
+        );
     }
 
     /**

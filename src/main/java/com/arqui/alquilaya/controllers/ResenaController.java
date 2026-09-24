@@ -3,7 +3,7 @@ package com.arqui.alquilaya.controllers;
 import com.arqui.alquilaya.dtos.ResenaDTO;
 import com.arqui.alquilaya.entities.Resena;
 import com.arqui.alquilaya.services.ResenaService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +14,10 @@ import java.util.List;
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/alquilaya")
+@RequiredArgsConstructor
 public class ResenaController {
 
-    @Autowired
-    ResenaService resenaService;
+    private final ResenaService resenaService;
 
     /** Listar reseñas de una propiedad específica. */
     @GetMapping("/resenas/propiedad/{propiedadId}")

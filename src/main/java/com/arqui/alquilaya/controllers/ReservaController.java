@@ -3,7 +3,7 @@ package com.arqui.alquilaya.controllers;
 import com.arqui.alquilaya.dtos.ReservaDTO;
 import com.arqui.alquilaya.entities.Reserva;
 import com.arqui.alquilaya.services.ReservaService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +17,10 @@ import java.util.List;
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/alquilaya")
+@RequiredArgsConstructor
 public class ReservaController {
 
-    @Autowired
-    ReservaService reservaService;
+    private final ReservaService reservaService;
 
     /** Listar todas las reservas de un cliente. */
     @GetMapping("/reservas/cliente/{clienteId}")

@@ -3,7 +3,7 @@ package com.arqui.alquilaya.services.impl;
 import com.arqui.alquilaya.entities.Propietario;
 import com.arqui.alquilaya.repositories.PropietarioRepository;
 import com.arqui.alquilaya.services.PropietarioService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,10 +13,10 @@ import java.util.List;
  * Gestiona las operaciones de perfil de los dueños de inmuebles.
  */
 @Service
+@RequiredArgsConstructor
 public class PropietarioServiceImpl implements PropietarioService {
 
-    @Autowired
-    PropietarioRepository propietarioRepository;
+    private final PropietarioRepository propietarioRepository;
 
     @Override
     public Propietario add(Propietario propietario) {

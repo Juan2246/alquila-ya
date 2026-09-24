@@ -32,6 +32,7 @@ createdb db_alquilaya
 # 2. Configurar credenciales (no se versionan)
 export DB_USERNAME=tu_usuario
 export DB_PASSWORD=tu_contraseña
+export JWT_SECRET=$(openssl rand -base64 48)   # opcional en local
 
 # 3. Arrancar
 ./mvnw spring-boot:run          # Windows: mvnw.cmd spring-boot:run
@@ -55,7 +56,7 @@ src/
 ├── main/
 │   ├── java/com/arqui/alquilaya/
 │   │   ├── AlquilayaApplication.java   Punto de entrada (paquete raíz: define el ámbito de escaneo)
-│   │   ├── config/                     Configuración de infraestructura (CORS, recursos estáticos)
+│   │   ├── config/                     Infraestructura (recursos estáticos) y carga de datos de ejemplo (DataSeeder)
 │   │   ├── security/                   Filtro JWT, UserDetails y reglas de autorización
 │   │   ├── controllers/                Capa HTTP: reciben la petición y delegan
 │   │   ├── dtos/                       Contratos de entrada/salida de la API
@@ -80,6 +81,15 @@ el esquema puede evolucionar sin romper a los clientes.
 **Por qué interfaz + implementación:** los controladores dependen de la interfaz
 (`services/`), no de la clase concreta (`services/impl/`). Esto permite sustituir
 una implementación o simularla en pruebas sin tocar la capa HTTP.
+
+**Controladores delgados:** los controladores solo traducen HTTP a llamadas de
+servicio. Las reglas de negocio (cotizar una estadía, firmar un contrato, armar
+el perfil según el rol) viven en `services/impl/`, donde se pueden probar sin
+levantar la capa web.
+
+**Inyección por constructor:** las dependencias se declaran como campos `final`
+y Lombok (`@RequiredArgsConstructor`) genera el constructor. Así ninguna clase
+queda a medio construir y se pueden instanciar en pruebas sin Spring.
 
 ## Endpoints principales
 
@@ -109,6 +119,8 @@ Las credenciales se leen de variables de entorno y **no se versionan**:
 |---|---|---|
 | `DB_USERNAME` | Usuario de PostgreSQL | `root` |
 | `DB_PASSWORD` | Contraseña de PostgreSQL | *(vacío)* |
+| `JWT_SECRET` | Clave de firma de los JWT, en Base64 (256 bits o más) | clave de desarrollo, **cámbiala fuera de local** |
+| `JWT_EXPIRATION_MS` | Vigencia del token en milisegundos | `10800000` (3 horas) |
 
 > **Nota:** `spring.jpa.hibernate.ddl-auto=create-drop` recrea el esquema en cada
 > arranque, lo que es cómodo en desarrollo pero **borra los datos**. Para un

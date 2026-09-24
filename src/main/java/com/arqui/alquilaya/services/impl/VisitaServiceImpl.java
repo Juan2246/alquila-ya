@@ -9,7 +9,7 @@ import com.arqui.alquilaya.repositories.VisitaRepository;
 import com.arqui.alquilaya.services.ClienteService;
 import com.arqui.alquilaya.services.PropiedadService;
 import com.arqui.alquilaya.services.VisitaService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,16 +21,14 @@ import java.util.List;
  * Las visitas inician con estado "PENDIENTE" y pueden cambiar a "COMPLETADA" o "CANCELADA".
  */
 @Service
+@RequiredArgsConstructor
 public class VisitaServiceImpl implements VisitaService {
 
-    @Autowired
-    VisitaRepository visitaRepository;
+    private final VisitaRepository visitaRepository;
 
-    @Autowired
-    ClienteService clienteService;
+    private final ClienteService clienteService;
 
-    @Autowired
-    PropiedadService propiedadService;
+    private final PropiedadService propiedadService;
 
     @Override
     public Visita findById(Long id) {

@@ -2,6 +2,8 @@ package com.arqui.alquilaya.services;
 
 import com.arqui.alquilaya.dtos.ContratoDTO;
 import com.arqui.alquilaya.entities.Contrato;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 public interface ContratoService {
@@ -10,4 +12,12 @@ public interface ContratoService {
     public List<Contrato> listByClienteId(Long clienteId);
     public ContratoDTO addDTO(ContratoDTO contratoDTO);
     public Contrato update(Contrato contrato);
+
+    /**
+     * Adjunta la imagen de firma a un contrato existente y lo marca como FIRMADO.
+     * @param id ID del contrato a firmar
+     * @param file imagen de la firma
+     * @return el contrato actualizado con la firma adjunta
+     */
+    public Contrato firmar(Long id, MultipartFile file);
 }
