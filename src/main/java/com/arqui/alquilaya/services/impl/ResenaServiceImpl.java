@@ -12,7 +12,7 @@ import com.arqui.alquilaya.services.ClienteService;
 import com.arqui.alquilaya.services.PropiedadService;
 import com.arqui.alquilaya.services.ResenaService;
 import jakarta.validation.ValidationException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,20 +25,17 @@ import java.util.List;
  * La puntuación general se calcula automáticamente como el promedio de las 3 subcategorías.
  */
 @Service
+@RequiredArgsConstructor
 public class ResenaServiceImpl implements ResenaService {
 
-    @Autowired
-    ResenaRepository resenaRepository;
+    private final ResenaRepository resenaRepository;
 
     // Se inyecta ReservaRepository para la validación de reserva completada
-    @Autowired
-    ReservaRepository reservaRepository;
+    private final ReservaRepository reservaRepository;
 
-    @Autowired
-    ClienteService clienteService;
+    private final ClienteService clienteService;
 
-    @Autowired
-    PropiedadService propiedadService;
+    private final PropiedadService propiedadService;
 
     @Override
     public Resena findById(Long id) {

@@ -3,7 +3,7 @@ package com.arqui.alquilaya.services.impl;
 import com.arqui.alquilaya.entities.Rol;
 import com.arqui.alquilaya.repositories.RolRepository;
 import com.arqui.alquilaya.services.RolService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,10 +12,10 @@ import org.springframework.stereotype.Service;
  * Equivale a AuthorityServiceImpl en el proyecto del profesor.
  */
 @Service
+@RequiredArgsConstructor
 public class RolServiceImpl implements RolService {
 
-    @Autowired
-    RolRepository rolRepository;
+    private final RolRepository rolRepository;
 
     @Override
     public Rol findById(Long id) {

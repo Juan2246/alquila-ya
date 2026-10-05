@@ -62,6 +62,6 @@ public class UserSecurity implements UserDetails {
      */
     @Override
     public boolean isEnabled() {
-        return user.getEnabled();
+        return Boolean.TRUE.equals(user.getEnabled());
     }
 }

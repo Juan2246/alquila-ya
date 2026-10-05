@@ -1,5 +1,6 @@
 package com.arqui.alquilaya.services;
 
+import com.arqui.alquilaya.dtos.PerfilDTO;
 import com.arqui.alquilaya.dtos.UserDTO;
 import com.arqui.alquilaya.entities.User;
 
@@ -11,4 +12,10 @@ public interface UserService {
     public User findById(Long id);
     public User findByUsername(String username);
     public UserDTO add(UserDTO userDTO);
+
+    /**
+     * Arma el perfil de un usuario autenticado según su rol: si es cliente o
+     * propietario, completa los datos personales de ese perfil.
+     */
+    public PerfilDTO obtenerPerfil(User user);
 }

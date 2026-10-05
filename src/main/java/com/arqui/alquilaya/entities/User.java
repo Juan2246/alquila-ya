@@ -1,10 +1,12 @@
 package com.arqui.alquilaya.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -23,7 +25,11 @@ public class User {
     // Nombre de usuario para el inicio de sesión (puede ser el correo electrónico)
     private String username;
 
-    // Contraseña encriptada con BCrypt (nunca se almacena en texto plano)
+    // Contraseña encriptada con BCrypt (nunca se almacena en texto plano).
+    // WRITE_ONLY: se acepta al recibir (login) pero nunca se incluye en las respuestas,
+    // porque el User viaja anidado dentro de Cliente, Propietario, Contrato, etc.
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @ToString.Exclude
     private String password;
 
     // Campo que indica si la cuenta está activa o deshabilitada

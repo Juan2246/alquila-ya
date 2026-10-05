@@ -1,6 +1,5 @@
 package com.arqui.alquilaya.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -59,15 +58,14 @@ public class SecurityConfiguration {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    @Autowired
-    JwtRequestFilter jwtRequestFilter;
-
     /**
      * Configura la cadena de filtros de seguridad HTTP.
      * Aquí se definen todas las reglas de autorización por rol y por endpoint.
+     * El filtro JWT llega como parámetro del @Bean: así la configuración no guarda
+     * estado propio y Spring resuelve la dependencia al construir la cadena.
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtRequestFilter jwtRequestFilter) throws Exception {
 
         // Registrar el filtro JWT ANTES del filtro de autenticación por defecto
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
@@ -108,6 +106,10 @@ public class SecurityConfiguration {
                         // Cualquier otra petición requiere autenticación
                         .anyRequest().authenticated()
         );
+
+        http.exceptionHandling(errores -> errores
+                .authenticationEntryPoint((request, response, error) -> response.sendError(401))
+                .accessDeniedHandler((request, response, error) -> response.sendError(403)));
 
         // Política STATELESS: no se crean sesiones HTTP (todo se maneja con JWT)
         http.sessionManagement(

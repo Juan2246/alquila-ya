@@ -1,6 +1,11 @@
 package com.arqui.alquilaya.services.impl;
 
 import com.arqui.alquilaya.dtos.ReservaDTO;
+import com.arqui.alquilaya.dtos.DisponibilidadDTO;
+import com.arqui.alquilaya.security.AccesoActual;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 import com.arqui.alquilaya.entities.Cliente;
 import com.arqui.alquilaya.entities.Propiedad;
 import com.arqui.alquilaya.entities.Reserva;
@@ -10,7 +15,7 @@ import com.arqui.alquilaya.services.ClienteService;
 import com.arqui.alquilaya.services.PropiedadService;
 import com.arqui.alquilaya.services.ReservaService;
 import jakarta.validation.ValidationException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,31 +30,42 @@ import java.util.List;
  * y cálculo automático del precio total.
  */
 @Service
+@RequiredArgsConstructor
 public class ReservaServiceImpl implements ReservaService {
 
-    @Autowired
-    ReservaRepository reservaRepository;
+    private final ReservaRepository reservaRepository;
 
-    @Autowired
-    ClienteService clienteService;
+    private final ClienteService clienteService;
 
-    @Autowired
-    PropiedadService propiedadService;
+    private final PropiedadService propiedadService;
+
+    private final AccesoActual acceso;
 
     @Override
     public Reserva findById(Long id) {
-        return reservaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Reserva con id: " + id + " no encontrada"));
+        Reserva reserva = reservaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada"));
+        acceso.exigirParticipante(reserva);
+        return reserva;
     }
 
     @Override
     public List<Reserva> listByClienteId(Long clienteId) {
+        acceso.exigirCliente(clienteService.findById(clienteId));
         return reservaRepository.findByCliente_Id(clienteId);
     }
 
     @Override
     public List<Reserva> listByPropiedadId(Long propiedadId) {
+        acceso.exigirPropietario(propiedadService.findById(propiedadId).getPropietario());
         return reservaRepository.findByPropiedad_Id(propiedadId);
+    }
+
+    @Override
+    public List<DisponibilidadDTO> disponibilidad(Long propiedadId) {
+        acceso.exigirConsulta();
+        propiedadService.findById(propiedadId);
+        return reservaRepository.disponibilidad(propiedadId);
     }
 
     /**
@@ -63,11 +79,15 @@ public class ReservaServiceImpl implements ReservaService {
      */
     @Override
     public ReservaDTO addDTO(ReservaDTO reservaDTO) {
-        // Paso 1: Buscar cliente y propiedad
+        if (reservaDTO.getClienteId() == null || reservaDTO.getPropiedadId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cliente y propiedad son obligatorios");
+        }
+        // Paso 1: Buscar cliente y autorizar antes de consultar reservas.
         Cliente cliente = clienteService.findById(reservaDTO.getClienteId());
         if (cliente == null) {
             throw new ResourceNotFoundException("Cliente con id: " + reservaDTO.getClienteId() + " no encontrado");
         }
+        acceso.exigirCliente(cliente);
         Propiedad propiedad = propiedadService.findById(reservaDTO.getPropiedadId());
 
         // Paso 2: Validar fechas
@@ -119,10 +139,19 @@ public class ReservaServiceImpl implements ReservaService {
      */
     @Override
     public Reserva update(Reserva reserva) {
-        Reserva found = findById(reserva.getId());
-        if (reserva.getEstado() != null) {
-            found.setEstado(reserva.getEstado());
+        if (reserva.getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La reserva es obligatoria");
         }
+        Reserva found = findById(reserva.getId());
+        String estado = reserva.getEstado();
+        if (estado == null || !List.of("PENDIENTE", "CONFIRMADA", "COMPLETADA", "CANCELADA").contains(estado)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Estado de reserva no válido");
+        }
+        // El cliente puede cancelar su reserva; confirmar y completar corresponden al propietario.
+        if (!acceso.esPropietario(found.getPropiedad().getPropietario()) && !"CANCELADA".equals(estado)) {
+            throw new AccessDeniedException("Solo el propietario puede confirmar o completar la reserva");
+        }
+        found.setEstado(estado);
         return reservaRepository.save(found);
     }
 }

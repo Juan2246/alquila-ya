@@ -35,7 +35,8 @@ target/
 
 # Variables de entorno y secretos (credenciales de base de datos, JWT)
 .env
-.env.local
+.env.*
+!.env.example
 application-local.properties
 
 # Archivos subidos por los usuarios en tiempo de ejecución

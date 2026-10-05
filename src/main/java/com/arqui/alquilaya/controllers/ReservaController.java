@@ -1,9 +1,10 @@
 package com.arqui.alquilaya.controllers;
 
 import com.arqui.alquilaya.dtos.ReservaDTO;
+import com.arqui.alquilaya.dtos.DisponibilidadDTO;
 import com.arqui.alquilaya.entities.Reserva;
 import com.arqui.alquilaya.services.ReservaService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +18,10 @@ import java.util.List;
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/alquilaya")
+@RequiredArgsConstructor
 public class ReservaController {
 
-    @Autowired
-    ReservaService reservaService;
+    private final ReservaService reservaService;
 
     /** Listar todas las reservas de un cliente. */
     @GetMapping("/reservas/cliente/{clienteId}")
@@ -28,10 +29,16 @@ public class ReservaController {
         return new ResponseEntity<>(reservaService.listByClienteId(id), HttpStatus.OK);
     }
 
-    /** Listar todas las reservas de una propiedad (para ver calendario de disponibilidad). */
+    /** Detalles de reservas: solo el propietario del inmueble. */
     @GetMapping("/reservas/propiedad/{propiedadId}")
     public ResponseEntity<List<Reserva>> listByPropiedadId(@PathVariable("propiedadId") Long id) {
         return new ResponseEntity<>(reservaService.listByPropiedadId(id), HttpStatus.OK);
+    }
+
+    /** Disponibilidad para clientes, sin revelar quién reservó. */
+    @GetMapping("/reservas/propiedad/{propiedadId}/disponibilidad")
+    public ResponseEntity<List<DisponibilidadDTO>> disponibilidad(@PathVariable("propiedadId") Long id) {
+        return ResponseEntity.ok(reservaService.disponibilidad(id));
     }
 
     /** Buscar una reserva por su ID. */

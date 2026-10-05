@@ -3,15 +3,11 @@ package com.arqui.alquilaya.controllers;
 import com.arqui.alquilaya.dtos.PerfilDTO;
 import com.arqui.alquilaya.dtos.TokenDTO;
 import com.arqui.alquilaya.dtos.UserDTO;
-import com.arqui.alquilaya.entities.Cliente;
-import com.arqui.alquilaya.entities.Propietario;
 import com.arqui.alquilaya.entities.User;
 import com.arqui.alquilaya.security.JwtUtilService;
 import com.arqui.alquilaya.security.UserSecurity;
-import com.arqui.alquilaya.services.ClienteService;
-import com.arqui.alquilaya.services.PropietarioService;
 import com.arqui.alquilaya.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,25 +22,17 @@ import java.util.stream.Collectors;
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/alquilaya")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    UserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
 
-    @Autowired
-    AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    JwtUtilService jwtUtilService;
+    private final JwtUtilService jwtUtilService;
 
-    @Autowired
-    ClienteService clienteService;
-
-    @Autowired
-    PropietarioService propietarioService;
 
 
     @PostMapping("/users/register")
@@ -88,42 +76,7 @@ public class UserController {
                 .getAuthentication().getPrincipal();
         User user = userSecurity.getUser();
 
-        // Determinar el rol del usuario
-        String rol = user.getRoles().stream()
-                .map(r -> r.getNombre())
-                .collect(Collectors.joining(";"));
-
-        PerfilDTO perfil = new PerfilDTO();
-        perfil.setUserId(user.getId());
-        perfil.setUsername(user.getUsername());
-        perfil.setRol(rol);
-
-        // Buscar el perfil según el rol
-        if (rol.contains("ROLE_CLIENTE")) {
-            Cliente cliente = clienteService.findByUserId(user.getId());
-            if (cliente != null) {
-                perfil.setPerfilId(cliente.getId());
-                perfil.setNombre(cliente.getNombre());
-                perfil.setApellido(cliente.getApellido());
-                perfil.setDni(cliente.getDni());
-                perfil.setCorreo(cliente.getCorreo());
-                perfil.setEdad(cliente.getEdad());
-                perfil.setFoto(cliente.getFoto());
-                perfil.setDescripcion(cliente.getDescripcion());
-            }
-        } else if (rol.contains("ROLE_PROPIETARIO")) {
-            Propietario propietario = propietarioService.findByUserId(user.getId());
-            if (propietario != null) {
-                perfil.setPerfilId(propietario.getId());
-                perfil.setNombre(propietario.getNombre());
-                perfil.setApellido(propietario.getApellido());
-                perfil.setDni(propietario.getDni());
-                perfil.setCorreo(propietario.getCorreo());
-                perfil.setEdad(propietario.getEdad());
-                perfil.setFoto(propietario.getFoto());
-                perfil.setDescripcion(propietario.getObservaciones());
-            }
-        }
+        PerfilDTO perfil = userService.obtenerPerfil(user);
 
         return new ResponseEntity<>(perfil, HttpStatus.OK);
     }

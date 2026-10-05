@@ -1,26 +1,29 @@
 package com.arqui.alquilaya;
 
-import org.junit.jupiter.api.DisplayName;
+import com.arqui.alquilaya.config.RolesIniciales;
+import com.arqui.alquilaya.repositories.UserRepository;
+import com.arqui.alquilaya.repositories.RolRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-/**
- * Prueba de humo del arranque de la aplicación.
- *
- * <p>Levanta el contexto completo de Spring contra la base de datos en memoria
- * del perfil {@code test}. Falla si algún bean, repositorio o pieza de la
- * configuración de seguridad deja de resolverse, de modo que un error de
- * cableado se detecta en el build y no en tiempo de ejecución.
- */
+import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootTest
 @ActiveProfiles("test")
-class AlquilayaApplicationTests {
+class AlquilayaApplicationTests extends EntornoDePrueba {
+    @Autowired UserRepository usuarios;
+    @Autowired RolRepository roles;
+    @Autowired RolesIniciales inicializador;
 
     @Test
-    @DisplayName("El contexto de la aplicación se levanta sin errores")
-    void contextLoads() {
-        // El propio arranque del contexto es la aserción: si algún bean no se
-        // puede construir, SpringBootTest hace fallar la prueba.
+    void arrancaSinCuentasDemoYLosRolesSonIdempotentes() {
+        assertThat(usuarios.count()).isZero();
+        assertThat(roles.findAll()).extracting("nombre")
+                .containsExactlyInAnyOrder("ROLE_CLIENTE", "ROLE_PROPIETARIO");
+        inicializador.run();
+        assertThat(roles.count()).isEqualTo(2);
+        assertThat(usuarios.count()).isZero();
     }
 }
