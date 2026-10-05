@@ -1,9 +1,14 @@
-# Alquila Ya
+<img src="docs/brand.svg" width="76" height="76" alt="Símbolo de AlquilaYa">
 
-API REST de una plataforma de alquiler de propiedades tipo Airbnb, desarrollada
-en equipo para el curso de Arquitectura de Aplicaciones Web (UPC).
+# AlquilaYa
 
-**Stack:** Java 25 · Spring Boot 4 · Spring Security (JWT) · Spring Data JPA · PostgreSQL
+AlquilaYa es el backend de una plataforma de alquiler de propiedades que desarrollamos en el curso de Arquitectura de Aplicaciones Web de la UPC. Me encargué de la API, el modelo de datos, las reglas de negocio y la seguridad.
+
+Quería que el recorrido de una reserva tuviera sentido de principio a fin: buscar una propiedad, revisar las fechas, calcular el precio y distinguir qué puede hacer el cliente y qué le corresponde al propietario.
+
+**Java 25 · Spring Boot 4 · Spring Security · PostgreSQL**
+
+[Ver el caso en mi portafolio](https://portafolio-juan-torres-puce.vercel.app/proyectos/alquila-ya)
 
 ## Funcionalidades
 
