@@ -1,6 +1,8 @@
 package com.arqui.alquilaya.security;
 
 import jakarta.servlet.FilterChain;
+import io.jsonwebtoken.JwtException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,7 +25,7 @@ import java.io.IOException;
  * 2. Si existe, extrae el username del token
  * 3. Carga los datos del usuario y valida el token
  * 4. Si es válido, establece la autenticación en el SecurityContext
- * 5. Si no hay token o es inválido, la petición continúa sin autenticación
+ * 5. Si el token es inválido se responde 401; sin token decide la política de la ruta
  */
 @Component
 @RequiredArgsConstructor
@@ -37,28 +39,25 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        // Paso 1: Obtener el header Authorization de la petición HTTP
-        final String authorizationHeader = request.getHeader("Authorization");
-
-        String username = null;
-        String token = null;
-
-        // Paso 2: Verificar si el header tiene formato "Bearer <token>"
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            token = authorizationHeader.substring(7); // Extraer solo el token (sin "Bearer ")
-            username = jwtUtilService.extractUsername(token);
-        }
-
-        // Paso 3: Si hay username y no hay autenticación previa, validar el token
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserSecurity securityUser = (UserSecurity) this.userDetailsService.loadUserByUsername(username);
-
-            // Paso 4: Si el token es válido, establecer la autenticación en el contexto de seguridad
-            if (jwtUtilService.validateToken(token, securityUser)) {
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        securityUser, null, securityUser.getAuthorities());
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        String cabecera = request.getHeader("Authorization");
+        if (cabecera != null && cabecera.startsWith("Bearer ")) {
+            try {
+                String token = cabecera.substring(7);
+                String username = jwtUtilService.extractUsername(token);
+                if (username == null || username.isBlank()) {
+                    throw new UsernameNotFoundException("Sesión no válida");
+                }
+                UserSecurity usuario = (UserSecurity) userDetailsService.loadUserByUsername(username);
+                if (!usuario.isEnabled() || !jwtUtilService.validateToken(token, usuario)) {
+                    throw new UsernameNotFoundException("Sesión no válida");
+                }
+                var autenticacion = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+                autenticacion.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(autenticacion);
+            } catch (JwtException | IllegalArgumentException | UsernameNotFoundException ex) {
+                SecurityContextHolder.clearContext();
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
             }
         }
         // Paso 5: Continuar con la cadena de filtros

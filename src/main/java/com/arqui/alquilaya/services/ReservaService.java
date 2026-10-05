@@ -1,6 +1,7 @@
 package com.arqui.alquilaya.services;
 
 import com.arqui.alquilaya.dtos.ReservaDTO;
+import com.arqui.alquilaya.dtos.DisponibilidadDTO;
 import com.arqui.alquilaya.entities.Reserva;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
  * Incluye validación de solapamiento de fechas.
  */
 public interface ReservaService {
+    public List<DisponibilidadDTO> disponibilidad(Long propiedadId);
     public Reserva findById(Long id);
     public List<Reserva> listByClienteId(Long clienteId);
     public List<Reserva> listByPropiedadId(Long propiedadId);

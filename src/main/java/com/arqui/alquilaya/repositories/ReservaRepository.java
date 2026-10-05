@@ -1,6 +1,7 @@
 package com.arqui.alquilaya.repositories;
 
 import com.arqui.alquilaya.entities.Reserva;
+import com.arqui.alquilaya.dtos.DisponibilidadDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +14,11 @@ import java.util.List;
  * Incluye query JPQL para validar solapamiento de fechas.
  */
 public interface ReservaRepository extends JpaRepository<Reserva, Long> {
+
+    @Query("SELECT new com.arqui.alquilaya.dtos.DisponibilidadDTO(r.fechaCheckIn, r.fechaCheckOut, r.estado) " +
+            "FROM Reserva r WHERE r.propiedad.id = :propiedadId " +
+            "AND r.estado IN ('PENDIENTE', 'CONFIRMADA') ORDER BY r.fechaCheckIn")
+    List<DisponibilidadDTO> disponibilidad(@Param("propiedadId") Long propiedadId);
 
     List<Reserva> findByCliente_Id(Long clienteId);
     List<Reserva> findByPropiedad_Id(Long propiedadId);

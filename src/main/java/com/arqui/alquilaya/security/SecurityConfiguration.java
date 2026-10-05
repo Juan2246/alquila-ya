@@ -107,6 +107,10 @@ public class SecurityConfiguration {
                         .anyRequest().authenticated()
         );
 
+        http.exceptionHandling(errores -> errores
+                .authenticationEntryPoint((request, response, error) -> response.sendError(401))
+                .accessDeniedHandler((request, response, error) -> response.sendError(403)));
+
         // Política STATELESS: no se crean sesiones HTTP (todo se maneja con JWT)
         http.sessionManagement(
                 (session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)

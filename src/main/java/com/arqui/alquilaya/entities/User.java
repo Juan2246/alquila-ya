@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class User {
     // WRITE_ONLY: se acepta al recibir (login) pero nunca se incluye en las respuestas,
     // porque el User viaja anidado dentro de Cliente, Propietario, Contrato, etc.
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @ToString.Exclude
     private String password;
 
     // Campo que indica si la cuenta está activa o deshabilitada

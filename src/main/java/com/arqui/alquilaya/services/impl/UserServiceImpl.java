@@ -14,9 +14,10 @@ import com.arqui.alquilaya.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import java.nio.charset.StandardCharsets;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,20 +49,14 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsername(username);
     }
 
-    /**
-     * Convierte una cadena de roles separados por ";" en una lista de entidades Rol.
-     * Por ejemplo: "ROLE_PROPIETARIO;ROLE_CLIENTE" → [Rol(ROLE_PROPIETARIO), Rol(ROLE_CLIENTE)]
-     */
-    private List<Rol> rolesFromString(String roles) {
-        List<Rol> rolList = new ArrayList<>();
-        List<String> rolStringList = Arrays.stream(roles.split(";")).toList();
-        for (String rolString : rolStringList) {
-            Rol rol = rolService.findByNombre(rolString);
-            if (rol != null) {
-                rolList.add(rol);
-            }
+    /** El registro público permite exactamente uno de los dos perfiles del producto. */
+    private List<Rol> rolesFromString(String nombre) {
+        if (!"ROLE_CLIENTE".equals(nombre) && !"ROLE_PROPIETARIO".equals(nombre)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Elige un único rol: cliente o propietario");
         }
-        return rolList;
+        Rol rol = rolService.findByNombre(nombre);
+        if (rol == null) throw new IllegalStateException("Falta la configuración de roles");
+        return List.of(rol);
     }
 
     /**
@@ -74,14 +69,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO add(UserDTO userDTO) {
         List<Rol> rolList = rolesFromString(userDTO.getRoles());
+        if (userDTO.getUsername() == null || userDTO.getUsername().isBlank()
+                || userDTO.getPassword() == null || userDTO.getPassword().isBlank()
+                || userDTO.getPassword().getBytes(StandardCharsets.UTF_8).length > 72) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Credenciales de registro no válidas");
+        }
 
         User newUser = new User(null, userDTO.getUsername(),
                 new BCryptPasswordEncoder().encode(userDTO.getPassword()),
                 true, rolList);
 
         newUser = userRepository.save(newUser);
-        userDTO.setId(newUser.getId());
-        return userDTO;
+        return new UserDTO(newUser.getId(), newUser.getUsername(), null, userDTO.getRoles());
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.arqui.alquilaya.services.impl;
 
 import com.arqui.alquilaya.dtos.CotizacionDTO;
+import com.arqui.alquilaya.security.AccesoActual;
 import com.arqui.alquilaya.dtos.PropiedadDTO;
 import com.arqui.alquilaya.entities.Comodidad;
 import com.arqui.alquilaya.entities.Propiedad;
@@ -38,6 +39,8 @@ public class PropiedadServiceImpl implements PropiedadService {
 
     private final ComodidadRepository comodidadRepository;
 
+    private final AccesoActual acceso;
+
     /**
      * Guarda una propiedad en la base de datos después de validar campos obligatorios.
      */
@@ -46,9 +49,15 @@ public class PropiedadServiceImpl implements PropiedadService {
         if (propiedad.getTitulo() == null || propiedad.getTitulo().isBlank()) {
             throw new ValidationException("El título de la propiedad no puede estar vacío");
         }
-        if (propiedad.getPropietario() == null) {
+        if (propiedad.getId() != null) {
+            throw new ValidationException("Una propiedad nueva no debe tener un ID");
+        }
+        if (propiedad.getPropietario() == null || propiedad.getPropietario().getId() == null) {
             throw new ValidationException("La propiedad debe tener un propietario asignado");
         }
+        Propietario propietario = propietarioService.findById(propiedad.getPropietario().getId());
+        acceso.exigirPropietario(propietario);
+        propiedad.setPropietario(propietario);
         return propiedadRepository.save(propiedad);
     }
 
@@ -167,6 +176,7 @@ public class PropiedadServiceImpl implements PropiedadService {
     @Override
     public Propiedad update(Propiedad propiedad) {
         Propiedad found = findById(propiedad.getId());
+        acceso.exigirPropietario(found.getPropietario());
 
         if (propiedad.getTitulo() != null && !propiedad.getTitulo().isBlank()) {
             found.setTitulo(propiedad.getTitulo());
@@ -200,9 +210,8 @@ public class PropiedadServiceImpl implements PropiedadService {
 
     @Override
     public void delete(Long id) {
-        if (findById(id) == null) {
-            throw new ResourceNotFoundException("Propiedad con id: " + id + " no encontrada para eliminar");
-        }
+        Propiedad found = findById(id);
+        acceso.exigirPropietario(found.getPropietario());
         propiedadRepository.deleteById(id);
     }
 }

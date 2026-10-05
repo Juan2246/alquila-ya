@@ -25,18 +25,12 @@ lógica de negocio, persistencia y capa de seguridad.
 Requisitos: **JDK 25** y una instancia de **PostgreSQL**. No hace falta instalar
 Maven: el repositorio incluye el *Maven Wrapper*.
 
-```bash
-# 1. Crear la base de datos
-createdb db_alquilaya
-
-# 2. Configurar credenciales (no se versionan)
-export DB_USERNAME=tu_usuario
-export DB_PASSWORD=tu_contraseña
-export JWT_SECRET=$(openssl rand -base64 48)   # opcional en local
-
-# 3. Arrancar
-./mvnw spring-boot:run          # Windows: mvnw.cmd spring-boot:run
-```
+1. Crear la base de datos `db_alquilaya` en PostgreSQL.
+2. Definir `DB_USERNAME`, `DB_PASSWORD` y `JWT_SECRET` en el entorno local. La clave
+   JWT debe ser aleatoria, estar codificada en Base64 y tener al menos 32 bytes.
+   Se puede generar localmente con `openssl rand -base64 32`; no se debe copiar
+   el resultado al repositorio.
+3. Ejecutar `./mvnw spring-boot:run` (Windows: `mvnw.cmd spring-boot:run`).
 
 La API queda escuchando en `http://localhost:8080/alquilaya`.
 
@@ -44,6 +38,12 @@ La API queda escuchando en `http://localhost:8080/alquilaya`.
 ./mvnw test        # ejecutar las pruebas (usan H2 en memoria, no requieren PostgreSQL)
 ./mvnw package     # generar el .jar ejecutable en target/
 ```
+
+`./mvnw verify` compila, ejecuta las pruebas y empaqueta. Las pruebas de seguridad
+pasan por los filtros HTTP con clientes y propietarios distintos: comprueban
+accesos propios y ajenos, roles de registro, respuestas sin contraseña, calendario
+sin datos del huésped y rechazo de sesiones inválidas. La clave JWT y las claves
+de las cuentas de prueba se generan durante la ejecución.
 
 ## Estructura del proyecto
 
@@ -74,9 +74,10 @@ src/
         └── application-test.properties Perfil de pruebas con H2 en memoria
 ```
 
-**Por qué los DTO:** las entidades JPA nunca se exponen por HTTP. Los DTO
-desacoplan el contrato público de la API del modelo de base de datos, de modo que
-el esquema puede evolucionar sin romper a los clientes.
+**DTO y entidades:** las altas y algunas consultas usan DTO; otras respuestas
+conservan entidades del proyecto académico. Las contraseñas se aceptan en login
+y registro, pero se excluyen de las respuestas, incluso cuando un usuario aparece
+anidado dentro de un propietario o cliente.
 
 **Por qué interfaz + implementación:** los controladores dependen de la interfaz
 (`services/`), no de la clase concreta (`services/impl/`). Esto permite sustituir
@@ -99,7 +100,7 @@ Todas las rutas cuelgan de `/alquilaya`.
 |---|---|
 | Usuarios | `POST /users/register` · `POST /users/login` · `GET /users/perfil` |
 | Propiedades | `GET /propiedades` · `GET /propiedades/buscar` · `GET /propiedades/{id}/cotizar` · `POST` · `PUT` · `DELETE` |
-| Reservas | `GET /reservas/cliente/{id}` · `GET /reservas/propiedad/{id}` · `POST` · `PUT` |
+| Reservas | `GET /reservas/cliente/{id}` · `GET /reservas/propiedad/{id}` · `GET /reservas/propiedad/{id}/disponibilidad` · `POST` · `PUT` |
 | Visitas | `GET /visitas/cliente/{id}` · `POST` · `PUT` |
 | Contratos | `GET /contratos` · `POST /contratos/{id}/firmar` |
 | Pagos | `GET /pagos/contrato/{id}` · `POST /pagos` |
@@ -113,19 +114,46 @@ Salvo el registro y el login, todos los endpoints exigen la cabecera
 
 ## Configuración
 
-Las credenciales se leen de variables de entorno y **no se versionan**:
+Las credenciales se obtienen de variables de entorno. No hay clave JWT compartida
+ni cuentas creadas automáticamente en el arranque normal.
 
 | Variable | Descripción | Valor por defecto |
 |---|---|---|
+| `DB_URL` | Conexión PostgreSQL | Base local `db_alquilaya` |
 | `DB_USERNAME` | Usuario de PostgreSQL | `root` |
-| `DB_PASSWORD` | Contraseña de PostgreSQL | *(vacío)* |
-| `JWT_SECRET` | Clave de firma de los JWT, en Base64 (256 bits o más) | clave de desarrollo, **cámbiala fuera de local** |
-| `JWT_EXPIRATION_MS` | Vigencia del token en milisegundos | `10800000` (3 horas) |
+| `DB_PASSWORD` | Clave de PostgreSQL | Vacío; definir en el entorno |
+| `JWT_SECRET` | Clave Base64 de al menos 256 bits | Obligatoria |
+| `JWT_EXPIRATION_MS` | Duración de la sesión | 3 horas |
+| `DDL_AUTO` | Política Hibernate del esquema | `update` |
 
-> **Nota:** `spring.jpa.hibernate.ddl-auto=create-drop` recrea el esquema en cada
-> arranque, lo que es cómodo en desarrollo pero **borra los datos**. Para un
-> despliegue real debe cambiarse a `validate` y gestionar el esquema con
-> migraciones (Flyway o Liquibase).
+El arranque conserva los datos. Para un despliegue gestionado, usar `validate` y
+migraciones del esquema. El perfil `test` usa H2 y `create-drop`, con una clave de
+firma efímera generada por las pruebas.
+
+### Datos demo opcionales
+
+Activar `SPRING_PROFILES_ACTIVE=demo` y definir `DEMO_OWNER_PASSWORD` y
+`DEMO_CLIENT_PASSWORD` localmente. Solo en una base sin cuentas se crean un
+propietario, un cliente, una propiedad y una reserva ficticios. Los usuarios de
+esa demostración usan el dominio reservado `example.invalid`. No se muestran ni
+se registran las claves; las cuentas existentes se conservan.
+
+### Permisos revisados
+
+- El registro acepta exactamente `ROLE_CLIENTE` o `ROLE_PROPIETARIO`.
+- Un cliente crea y consulta sus propias reservas. Puede cancelar una reserva
+  propia; confirmar y completar corresponden al dueño del inmueble.
+- El detalle de una reserva lo ven su cliente y el propietario de la propiedad.
+  La lista de reservas de un inmueble es privada para su dueño.
+- Para ver fechas ocupadas se usa `/reservas/propiedad/{id}/disponibilidad`:
+  devuelve únicamente entrada, salida y estado de reservas activas, sin personas
+  ni identificadores de reserva.
+- Crear, modificar o eliminar una propiedad requiere ser su propietario.
+- Los tokens inválidos y las cuentas deshabilitadas no permiten autenticarse.
+
+Este mantenimiento cubre registro, autenticación, propiedades y reservas. No es
+una auditoría completa de los demás recursos académicos (contratos, pagos,
+visitas, reseñas, favoritos, notificaciones y archivos).
 
 ## Estado del proyecto
 

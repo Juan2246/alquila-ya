@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * Clase principal de la aplicación AlquilaYa.
- * Los datos de ejemplo que se cargan al arrancar viven en {@link com.arqui.alquilaya.config.DataSeeder}.
+ * Los datos opcionales del perfil demo viven en {@link com.arqui.alquilaya.config.DataSeeder}.
  */
 @SpringBootApplication
 public class AlquilayaApplication {

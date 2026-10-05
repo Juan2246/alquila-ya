@@ -1,6 +1,7 @@
 package com.arqui.alquilaya.controllers;
 
 import com.arqui.alquilaya.dtos.ReservaDTO;
+import com.arqui.alquilaya.dtos.DisponibilidadDTO;
 import com.arqui.alquilaya.entities.Reserva;
 import com.arqui.alquilaya.services.ReservaService;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +29,16 @@ public class ReservaController {
         return new ResponseEntity<>(reservaService.listByClienteId(id), HttpStatus.OK);
     }
 
-    /** Listar todas las reservas de una propiedad (para ver calendario de disponibilidad). */
+    /** Detalles de reservas: solo el propietario del inmueble. */
     @GetMapping("/reservas/propiedad/{propiedadId}")
     public ResponseEntity<List<Reserva>> listByPropiedadId(@PathVariable("propiedadId") Long id) {
         return new ResponseEntity<>(reservaService.listByPropiedadId(id), HttpStatus.OK);
+    }
+
+    /** Disponibilidad para clientes, sin revelar quién reservó. */
+    @GetMapping("/reservas/propiedad/{propiedadId}/disponibilidad")
+    public ResponseEntity<List<DisponibilidadDTO>> disponibilidad(@PathVariable("propiedadId") Long id) {
+        return ResponseEntity.ok(reservaService.disponibilidad(id));
     }
 
     /** Buscar una reserva por su ID. */
