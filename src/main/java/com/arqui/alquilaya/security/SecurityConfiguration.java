@@ -1,5 +1,6 @@
 package com.arqui.alquilaya.security;
 
+import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -35,9 +36,11 @@ public class SecurityConfiguration {
             // Endpoints de login y registro (deben ser accesibles sin token)
             "/alquilaya/users/login/**",
             "/alquilaya/users/register/**",
+            "/alquilaya/users/registro-completo",
 
             // Archivos estáticos (imágenes subidas)
-            "/uploads/**",
+            "/uploads/propiedades/**",
+            "/uploads/perfiles/**",
     };
 
     /**
@@ -77,7 +80,9 @@ public class SecurityConfiguration {
         http.authorizeHttpRequests(
                 (auth) -> auth
                         // Rutas públicas (sin autenticación)
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(AUTH_WHITELIST).permitAll()
+                        .requestMatchers("/uploads/firmas/**").denyAll()
 
                         // === PROPIEDADES: solo PROPIETARIO puede crear, editar y eliminar ===
                         .requestMatchers(HttpMethod.POST, "/alquilaya/propiedades/**").hasAuthority("ROLE_PROPIETARIO")

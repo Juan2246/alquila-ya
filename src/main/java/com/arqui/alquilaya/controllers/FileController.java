@@ -14,7 +14,6 @@ import java.util.Map;
  * Permite subir fotos de perfil, fotos de propiedades y firmas de contratos.
  */
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/alquilaya")
 @RequiredArgsConstructor
 public class FileController {

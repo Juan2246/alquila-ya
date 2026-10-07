@@ -1,5 +1,6 @@
 package com.arqui.alquilaya.services;
 
+import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -8,6 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
  * y las guarda en una carpeta local del servidor.
  */
 public interface FileStorageService {
+    void validarFotoPropia(String url);
+    Resource leerFirma(String url);
     /**
      * Guarda un archivo en el subdirectorio especificado.
      * @param file archivo a guardar
