@@ -1,0 +1,92 @@
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #717171;
+  text-decoration: none;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.imagen-portada {
+  width: 100%;
+  height: 320px;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.imagen-portada img { width: 100%; height: 100%; object-fit: cover; }
+
+.disposicion-detalle {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+}
+
+.columna-info h1 { margin-bottom: 4px; }
+
+.ubicacion, .detalles-basicos { color: #717171; font-size: 14px; }
+
+.descripcion { color: #444; line-height: 1.6; }
+
+.chips-comodidades { margin-bottom: 16px; }
+
+.anfitrion { color: #717171; margin-top: 16px; }
+
+.lista-clausulas {
+  color: #444;
+  line-height: 1.8;
+  padding-left: 20px;
+}
+
+.tarjeta-resena { margin-bottom: 10px; padding: 12px 16px; }
+
+.respuesta-anfitrion {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #f7f7f7;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.seccion-visita {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.seccion-visita h4 { margin: 0 0 10px 0; font-size: 14px; color: #444; }
+
+.campo-fecha-visita { width: 100%; }
+
+.puntuacion { float: right; }
+
+.sin-resenas { color: #717171; font-size: 14px; }
+
+.formulario-resena { margin-top: 20px; }
+
+.tarjeta-reserva {
+  position: sticky;
+  top: 90px;
+  padding: 20px;
+}
+
+.precio-noche { font-size: 20px; margin-bottom: 12px; }
+
+.resumen-cotizacion {
+  background: #f7f7f7;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.resumen-cotizacion .total { font-weight: 700; font-size: 16px; }
+
+.aviso-rol { font-size: 13px; color: #717171; text-align: center; }
+
+@media (max-width: 900px) {
+  .disposicion-detalle { grid-template-columns: 1fr; }
+  .tarjeta-reserva { position: static; }
+}

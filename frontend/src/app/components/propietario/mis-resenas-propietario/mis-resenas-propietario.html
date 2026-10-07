@@ -1,0 +1,40 @@
+<div class="estado-error" role="alert" *ngIf="errorCarga">
+  <mat-icon aria-hidden="true">error_outline</mat-icon><p>{{ errorCarga }}</p>
+  <button mat-stroked-button type="button" (click)="ngOnInit()">Reintentar</button>
+</div>
+<div class="contenedor">
+  <h1 class="titulo-seccion">Reseñas de mis propiedades</h1>
+
+  <div class="estado-carga" *ngIf="cargando">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div class="sin-resultados" *ngIf="!cargando && !errorCarga && listaResenas.length === 0">
+    <mat-icon>rate_review</mat-icon>
+    <p>Tus propiedades todavía no tienen reseñas.</p>
+  </div>
+
+  <div class="lista-resenas" *ngIf="!cargando">
+    <mat-card class="tarjeta-resena-item" *ngFor="let resena of listaResenas">
+      <p class="propiedad-titulo">{{ resena.propiedad.titulo }}</p>
+      <b>{{ resena.cliente.nombre }} {{ resena.cliente.apellido }}</b>
+      <span class="puntuacion">⭐ {{ resena.puntuacion }}/5</span>
+      <p class="comentario">{{ resena.comentario }}</p>
+
+      <div class="respuesta-existente" *ngIf="resena.respuestaPropietario">
+        <b>Tu respuesta:</b>
+        <p>{{ resena.respuestaPropietario }}</p>
+      </div>
+
+      <div class="form-respuesta" *ngIf="!resena.respuestaPropietario">
+        <mat-form-field appearance="outline" class="campo-respuesta">
+          <mat-label>Responder a esta reseña</mat-label>
+          <input matInput [(ngModel)]="respuestas[resena.id]">
+        </mat-form-field>
+        <button mat-stroked-button color="primary" (click)="Responder(resena)" [disabled]="enviando[resena.id]">
+          {{ enviando[resena.id] ? 'Enviando...' : 'Responder' }}
+        </button>
+      </div>
+    </mat-card>
+  </div>
+</div>

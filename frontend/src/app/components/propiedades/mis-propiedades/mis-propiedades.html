@@ -1,0 +1,31 @@
+<div class="estado-error" role="alert" *ngIf="errorCarga">
+  <mat-icon aria-hidden="true">error_outline</mat-icon><p>{{ errorCarga }}</p>
+  <button mat-stroked-button type="button" (click)="ngOnInit()">Reintentar</button>
+</div>
+<div class="contenedor">
+  <div class="encabezado-lista">
+    <h1 class="titulo-seccion">Mis propiedades</h1>
+    <button mat-flat-button color="primary" routerLink="/publicar-propiedad">
+      <mat-icon>add</mat-icon> Publicar nueva
+    </button>
+  </div>
+
+  <div class="estado-carga" *ngIf="cargando">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div class="sin-resultados" *ngIf="!cargando && !errorCarga && listaPropiedades.length === 0">
+    <mat-icon>apartment</mat-icon>
+    <p>Aún no has publicado ninguna propiedad.</p>
+  </div>
+
+  <div class="grilla-propiedades" *ngIf="!cargando">
+    <app-propiedad-card
+      *ngFor="let propiedad of listaPropiedades"
+      [propiedad]="propiedad"
+      [modoPropietario]="true"
+      (eliminar)="Eliminar($event)"
+      (editar)="Editar($event)">
+    </app-propiedad-card>
+  </div>
+</div>

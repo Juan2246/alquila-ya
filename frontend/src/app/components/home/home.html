@@ -1,0 +1,46 @@
+<div class="estado-error" role="alert" *ngIf="errorCarga">
+  <mat-icon aria-hidden="true">error_outline</mat-icon><p>{{ errorCarga }}</p>
+  <button mat-stroked-button type="button" (click)="ngOnInit()">Reintentar</button>
+</div>
+<div class="contenedor">
+
+  <h1 class="titulo-seccion">Encuentra tu próxima estadía</h1>
+
+  <form [formGroup]="filtroForm" class="barra-filtros" (ngSubmit)="Buscar()">
+    <mat-form-field appearance="outline" class="campo-filtro">
+      <mat-label>Distrito</mat-label>
+      <input matInput formControlName="distrito" placeholder="Ej. Miraflores">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="campo-filtro">
+      <mat-label>Precio máximo</mat-label>
+      <input matInput type="number" formControlName="precioMax" placeholder="S/.">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="campo-filtro">
+      <mat-label>Huéspedes</mat-label>
+      <input matInput type="number" formControlName="capacidad">
+    </mat-form-field>
+
+    <button mat-flat-button color="primary" type="submit">
+      <mat-icon>search</mat-icon> Buscar
+    </button>
+    <button mat-stroked-button type="button" (click)="LimpiarFiltros()">
+      Limpiar
+    </button>
+  </form>
+
+  <div class="estado-carga" *ngIf="cargando">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div class="sin-resultados" *ngIf="!cargando && !errorCarga && listaPropiedades.length === 0">
+    <mat-icon>search_off</mat-icon>
+    <p>No encontramos propiedades con esos filtros.</p>
+  </div>
+
+  <div class="grilla-propiedades" *ngIf="!cargando">
+    <app-propiedad-card *ngFor="let propiedad of listaPropiedades" [propiedad]="propiedad"></app-propiedad-card>
+  </div>
+
+</div>

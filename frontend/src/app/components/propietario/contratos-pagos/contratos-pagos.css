@@ -1,0 +1,51 @@
+.titulo-seccion { font-size: 26px; color: #222; margin-bottom: 8px; }
+
+.estado-carga { display: flex; justify-content: center; padding: 60px 0; }
+
+.sin-resultados { text-align: center; color: #717171; padding: 60px 0; }
+
+.lista-contratos {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.tarjeta-contrato-item { padding: 16px 20px; }
+
+.fila-principal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.info-contrato h3 { margin: 0 0 4px 0; }
+
+.estado-pendiente { background: #fff3cd; }
+.estado-firmado { background: #d4edda; }
+
+.seccion-pagos {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.lista-pagos { margin-bottom: 12px; }
+
+.fila-pago {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.sin-pagos { color: #717171; font-size: 14px; margin-bottom: 12px; }
+
+.form-pago {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}

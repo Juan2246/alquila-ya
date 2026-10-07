@@ -1,0 +1,22 @@
+<mat-card class="tarjeta-propiedad" [routerLink]="['/propiedades', propiedad.id]">
+  <div class="imagen-contenedor">
+    <img [src]="imagenPrincipal" alt="{{propiedad.titulo}}">
+    <span class="chip-distrito" *ngIf="propiedad.distrito">{{ propiedad.distrito }}</span>
+  </div>
+
+  <div class="info-propiedad">
+    <h3>{{ propiedad.titulo }}</h3>
+    <p class="ubicacion"><mat-icon inline="true">place</mat-icon> {{ propiedad.ubicacion }}</p>
+    <p class="detalles">{{ propiedad.habitaciones }} hab. · hasta {{ propiedad.capacidad }} huéspedes</p>
+    <p class="precio"><b>S/. {{ propiedad.precio }}</b> / noche</p>
+
+    <div class="acciones-propietario" *ngIf="modoPropietario">
+      <button mat-stroked-button color="primary" (click)="onEditar($event)">
+        <mat-icon>edit</mat-icon> Editar
+      </button>
+      <button mat-stroked-button color="warn" (click)="onEliminar($event)">
+        <mat-icon>delete</mat-icon> Eliminar
+      </button>
+    </div>
+  </div>
+</mat-card>

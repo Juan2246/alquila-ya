@@ -1,0 +1,130 @@
+<div class="estado-error" role="alert" *ngIf="errorCarga">
+  <mat-icon aria-hidden="true">error_outline</mat-icon><p>{{ errorCarga }}</p>
+  <button mat-stroked-button type="button" (click)="ngOnInit()">Reintentar</button>
+</div>
+<div class="contenedor" *ngIf="!cargando && propiedad">
+
+  <a class="volver" routerLink="/inicio"><mat-icon>arrow_back</mat-icon> Volver a explorar</a>
+
+  <div class="imagen-portada">
+    <img [src]="imagenPrincipal" alt="{{propiedad.titulo}}">
+  </div>
+
+  <div class="disposicion-detalle">
+
+    <div class="columna-info">
+      <h1>{{ propiedad.titulo }}</h1>
+      <p class="ubicacion"><mat-icon inline="true">place</mat-icon> {{ propiedad.ubicacion }}, {{ propiedad.distrito }}</p>
+      <p class="detalles-basicos">{{ propiedad.habitaciones }} habitaciones · hasta {{ propiedad.capacidad }} huéspedes</p>
+
+      <h3>Sobre este lugar</h3>
+      <p class="descripcion">{{ propiedad.descripcion }}</p>
+
+      <h3 *ngIf="propiedad.comodidades.length">Comodidades</h3>
+      <div class="chips-comodidades" *ngIf="propiedad.comodidades.length">
+        <mat-chip-set>
+          <mat-chip *ngFor="let comodidad of propiedad.comodidades">{{ comodidad.nombre }}</mat-chip>
+        </mat-chip-set>
+      </div>
+
+      <p class="anfitrion" *ngIf="propiedad.propietario">
+        Publicado por <b>{{ propiedad.propietario.nombre }} {{ propiedad.propietario.apellido }}</b>
+      </p>
+
+      <div *ngIf="propiedad.clausulas.length">
+        <h3>Reglas de la propiedad</h3>
+        <ul class="lista-clausulas">
+          <li *ngFor="let clausula of propiedad.clausulas">{{ clausula.texto }}</li>
+        </ul>
+      </div>
+
+      <h3>Reseñas ({{ resenas.length }})</h3>
+      <div class="lista-resenas" *ngIf="resenas.length > 0">
+        <mat-card class="tarjeta-resena" *ngFor="let resena of resenas">
+          <b>{{ resena.cliente.nombre }} {{ resena.cliente.apellido }}</b>
+          <span class="puntuacion">⭐ {{ resena.puntuacion }}/5</span>
+          <p>{{ resena.comentario }}</p>
+          <div class="respuesta-anfitrion" *ngIf="resena.respuestaPropietario">
+            <b>Respuesta del anfitrión:</b>
+            <p>{{ resena.respuestaPropietario }}</p>
+          </div>
+        </mat-card>
+      </div>
+      <p *ngIf="!errorCarga && resenas.length === 0" class="sin-resenas">Aún no hay resenas para esta propiedad.</p>
+
+      <div class="formulario-resena" *ngIf="userService.esCliente()">
+        <h4>Dejar una resena</h4>
+        <form [formGroup]="resenaForm" (ngSubmit)="DejarResena()" class="form-columna">
+          <mat-form-field appearance="outline">
+            <mat-label>Limpieza (1-5)</mat-label>
+            <input matInput type="number" min="1" max="5" formControlName="puntuacionLimpieza">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Ubicación (1-5)</mat-label>
+            <input matInput type="number" min="1" max="5" formControlName="puntuacionUbicacion">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Comunicación (1-5)</mat-label>
+            <input matInput type="number" min="1" max="5" formControlName="puntuacionComunicacion">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Comentario</mat-label>
+            <input matInput formControlName="comentario">
+          </mat-form-field>
+          <button mat-stroked-button color="primary" type="submit">Publicar resena</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="columna-reserva">
+      <mat-card class="tarjeta-reserva">
+        <p class="precio-noche"><b>S/. {{ propiedad.precio }}</b> / noche</p>
+
+        <form [formGroup]="reservaForm" class="form-columna">
+          <mat-form-field appearance="outline">
+            <mat-label>Check-in</mat-label>
+            <input matInput type="date" formControlName="checkIn">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Check-out</mat-label>
+            <input matInput type="date" formControlName="checkOut">
+          </mat-form-field>
+
+          <button mat-stroked-button color="primary" type="button" (click)="Cotizar()" [disabled]="cotizando">
+            {{ cotizando ? 'Calculando...' : 'Ver precio total' }}
+          </button>
+
+          <div class="resumen-cotizacion" *ngIf="cotizacion">
+            <p>{{ cotizacion.noches }} noches x S/. {{ cotizacion.precioPorNoche }}</p>
+            <p class="total">Total: S/. {{ cotizacion.precioTotal }}</p>
+          </div>
+
+          <button mat-flat-button color="primary" type="button" (click)="Reservar()"
+                  *ngIf="userService.esCliente()" [disabled]="reservando || reservaForm.invalid">
+            {{ reservando ? 'Reservando...' : 'Reservar' }}
+          </button>
+
+          <p class="aviso-rol" *ngIf="!userService.esCliente()">
+            Solo los huéspedes pueden reservar propiedades.
+          </p>
+        </form>
+
+        <div class="seccion-visita" *ngIf="userService.esCliente()">
+          <h4>¿Prefieres visitarla antes?</h4>
+          <mat-form-field appearance="outline" class="campo-fecha-visita">
+            <mat-label>Fecha y hora de visita</mat-label>
+            <input matInput type="datetime-local" [(ngModel)]="fechaVisita">
+          </mat-form-field>
+          <button mat-stroked-button color="primary" type="button" (click)="AgendarVisita()" [disabled]="agendandoVisita">
+            {{ agendandoVisita ? 'Agendando...' : 'Agendar visita' }}
+          </button>
+        </div>
+      </mat-card>
+    </div>
+
+  </div>
+</div>
+
+<div class="estado-carga" *ngIf="cargando">
+  <mat-spinner diameter="36"></mat-spinner>
+</div>

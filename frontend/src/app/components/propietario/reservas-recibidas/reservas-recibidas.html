@@ -1,0 +1,40 @@
+<div class="estado-error" role="alert" *ngIf="errorCarga">
+  <mat-icon aria-hidden="true">error_outline</mat-icon><p>{{ errorCarga }}</p>
+  <button mat-stroked-button type="button" (click)="ngOnInit()">Reintentar</button>
+</div>
+<div class="contenedor">
+  <h1 class="titulo-seccion">Reservas recibidas</h1>
+
+  <div class="estado-carga" *ngIf="cargando">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div class="sin-resultados" *ngIf="!cargando && !errorCarga && listaReservas.length === 0">
+    <mat-icon>event_busy</mat-icon>
+    <p>Todavía no has recibido reservas en tus propiedades.</p>
+  </div>
+
+  <div class="lista-reservas" *ngIf="!cargando">
+    <mat-card class="tarjeta-reserva-item" *ngFor="let reserva of listaReservas">
+      <img class="miniatura-propiedad"
+           [src]="(reserva.propiedad.fotos && reserva.propiedad.fotos.length > 0) ? archivoUrl(reserva.propiedad.fotos[0].url) : imagenPorDefecto"
+           alt="{{ reserva.propiedad.titulo }}">
+      <div class="info-reserva">
+        <h3>{{ reserva.propiedad.titulo }}</h3>
+        <p>Huésped: {{ reserva.cliente.nombre }} {{ reserva.cliente.apellido }}</p>
+        <p>{{ reserva.fechaCheckIn }} → {{ reserva.fechaCheckOut }}</p>
+        <p class="precio">S/. {{ reserva.precioTotal }}</p>
+      </div>
+      <div class="estado-acciones">
+        <button mat-flat-button *ngIf="reserva.estado === 'PENDIENTE'" (click)="CambiarEstado(reserva.id, 'CONFIRMADA')">Confirmar reserva</button>
+        <button mat-stroked-button *ngIf="reserva.estado === 'PENDIENTE' || reserva.estado === 'CONFIRMADA'" (click)="CambiarEstado(reserva.id, 'CANCELADA')">Cancelar reserva</button>
+        <mat-chip [ngClass]="'estado-' + reserva.estado.toLowerCase()">{{ reserva.estado }}</mat-chip>
+        <button mat-flat-button color="primary"
+                *ngIf="PuedeCompletar(reserva)"
+                (click)="MarcarCompletada(reserva.id)">
+          Marcar como completada
+        </button>
+      </div>
+    </mat-card>
+  </div>
+</div>

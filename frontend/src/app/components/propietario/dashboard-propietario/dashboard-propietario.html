@@ -1,0 +1,43 @@
+<div class="estado-error" role="alert" *ngIf="errorCarga">
+  <mat-icon aria-hidden="true">error_outline</mat-icon><p>{{ errorCarga }}</p>
+  <button mat-stroked-button type="button" (click)="ngOnInit()">Reintentar</button>
+</div>
+<div class="contenedor">
+  <h1 class="titulo-seccion">Dashboard</h1>
+
+  <div class="estado-carga" *ngIf="cargando">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div class="sin-resultados" *ngIf="!cargando && totalPropiedades === 0">
+    <mat-icon>dashboard</mat-icon>
+    <p>Todavía no has publicado ninguna propiedad. Publica una para ver tus estadísticas aquí.</p>
+    <button mat-flat-button color="primary" routerLink="/publicar-propiedad">Publicar propiedad</button>
+  </div>
+
+  <div class="grilla-metricas" *ngIf="!cargando && totalPropiedades > 0">
+    <mat-card class="tarjeta-metrica">
+      <mat-icon>apartment</mat-icon>
+      <p class="valor-metrica">{{ totalPropiedades }}</p>
+      <p class="etiqueta-metrica">Propiedades publicadas</p>
+    </mat-card>
+
+    <mat-card class="tarjeta-metrica">
+      <mat-icon>event_available</mat-icon>
+      <p class="valor-metrica">{{ totalReservas }}</p>
+      <p class="etiqueta-metrica">Reservas recibidas</p>
+    </mat-card>
+
+    <mat-card class="tarjeta-metrica">
+      <mat-icon>payments</mat-icon>
+      <p class="valor-metrica">S/. {{ ingresosTotales }}</p>
+      <p class="etiqueta-metrica">Valor de reservas</p>
+    </mat-card>
+
+    <mat-card class="tarjeta-metrica">
+      <mat-icon>star</mat-icon>
+      <p class="valor-metrica">{{ calificacionPromedio !== null ? calificacionPromedio + ' / 5' : 'Sin datos' }}</p>
+      <p class="etiqueta-metrica">Calificación promedio ({{ totalResenas }} reseñas)</p>
+    </mat-card>
+  </div>
+</div>

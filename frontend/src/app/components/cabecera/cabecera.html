@@ -1,0 +1,59 @@
+<mat-toolbar class="cabecera" *ngIf="userService.estaLogeado()">
+  <a class="logo" routerLink="/inicio" aria-label="AlquilaYa, inicio">
+    <mat-icon>holiday_village</mat-icon>
+    AlquilaYa
+  </a>
+
+  <span class="espaciador"></span>
+
+  <a class="enlace" routerLink="/inicio" routerLinkActive="activo">
+    <mat-icon>search</mat-icon> Explorar
+  </a>
+
+  <a class="enlace" *ngIf="userService.esPropietario()" routerLink="/mis-propiedades" routerLinkActive="activo">
+    <mat-icon>apartment</mat-icon> Mis propiedades
+  </a>
+
+  <button type="button" class="enlace" *ngIf="userService.esPropietario()" [matMenuTriggerFor]="menuPropietario" style="cursor:pointer">
+    <mat-icon>storefront</mat-icon> Panel de anfitrión
+  </button>
+  <mat-menu #menuPropietario="matMenu">
+    <a mat-menu-item routerLink="/dashboard"><mat-icon>dashboard</mat-icon> Dashboard</a>
+    <a mat-menu-item routerLink="/reservas-recibidas"><mat-icon>event_available</mat-icon> Reservas recibidas</a>
+    <a mat-menu-item routerLink="/visitas-recibidas"><mat-icon>event_note</mat-icon> Visitas agendadas</a>
+    <a mat-menu-item routerLink="/contratos-pagos"><mat-icon>payments</mat-icon> Contratos y pagos</a>
+    <a mat-menu-item routerLink="/mis-resenas"><mat-icon>rate_review</mat-icon> Reseñas recibidas</a>
+  </mat-menu>
+
+  <a class="enlace" *ngIf="userService.esCliente()" routerLink="/mis-reservas" routerLinkActive="activo">
+    <mat-icon>event_available</mat-icon> Mis reservas
+  </a>
+
+  <a class="enlace" *ngIf="userService.esCliente()" routerLink="/mis-contratos" routerLinkActive="activo">
+    <mat-icon>description</mat-icon> Mis contratos
+  </a>
+
+  <button type="button" aria-label="Notificaciones" class="enlace campana" style="cursor:pointer" [matMenuTriggerFor]="menuNotificaciones" (menuOpened)="AbrirNotificaciones()">
+    <mat-icon [matBadge]="noLeidas" [matBadgeHidden]="noLeidas === 0" matBadgeColor="warn" matBadgeSize="small">notifications</mat-icon>
+  </button>
+  <mat-menu #menuNotificaciones="matMenu" class="menu-notificaciones">
+    <p role="status" *ngIf="cargandoNotificaciones">Cargando notificaciones…</p>
+    <p role="alert" *ngIf="errorNotificaciones">{{ errorNotificaciones }}</p>
+    <div class="sin-notificaciones" *ngIf="!cargandoNotificaciones && !errorNotificaciones && listaNotificaciones.length === 0">
+      <p>No tienes notificaciones.</p>
+    </div>
+    <button mat-menu-item *ngFor="let notificacion of listaNotificaciones"
+            [class.no-leida]="!notificacion.leida" (click)="MarcarLeida(notificacion)">
+      <div class="item-notificacion">
+        <b>{{ notificacion.titulo }}</b>
+        <p>{{ notificacion.mensaje }}</p>
+      </div>
+    </button>
+  </mat-menu>
+
+  <span class="usuario">{{ userService.getNombreLogeado() || userService.getRolesLogeado() }}</span>
+
+  <button type="button" class="enlace" style="cursor:pointer" aria-label="Cerrar sesión" (click)="Logout()">
+    <mat-icon>logout</mat-icon>
+  </button>
+</mat-toolbar>

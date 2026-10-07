@@ -1,0 +1,100 @@
+/* Estilos globales de AlquilaYa */
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.contenedor {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 32px;
+}
+
+.grilla-propiedades {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.form-columna {
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  gap: 4px;
+}
+
+.form-columna mat-form-field {
+  width: 100%;
+}
+
+.pagina-centrada {
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+.tarjeta-formulario {
+  max-width: 480px;
+  width: 100%;
+  padding: 8px 8px 24px 8px;
+}
+
+/* El panel de mat-menu se renderiza fuera del arbol del componente (overlay),
+   por eso estos estilos van en el CSS global y no en cabecera.css */
+.menu-notificaciones {
+  max-width: 340px;
+}
+
+.menu-notificaciones .item-notificacion {
+  white-space: normal;
+  line-height: 1.4;
+  padding: 6px 0;
+}
+
+.menu-notificaciones .item-notificacion b {
+  display: block;
+  font-size: 14px;
+  color: #222;
+}
+
+.menu-notificaciones .item-notificacion p {
+  margin: 2px 0 0 0;
+  font-size: 13px;
+  color: #717171;
+}
+
+.menu-notificaciones button.no-leida {
+  background: #fff5f5;
+}
+
+.menu-notificaciones .sin-notificaciones {
+  padding: 16px;
+  color: #717171;
+  text-align: center;
+}
+
+/* Estados compartidos y adaptación de las pantallas existentes. */
+:root { color-scheme: light; }
+body { background: #f7f9f8; color: #23312c; }
+* { box-sizing: border-box; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid #21795b; outline-offset: 4px; }
+.estado-error { max-width: 1136px; margin: 20px auto; padding: 16px 20px; border: 1px solid #e7b6b1; border-radius: 12px; background: #fff2f0; color: #7a2821; display: flex; align-items: center; gap: 12px; }
+.estado-error p { flex: 1; margin: 0; line-height: 1.5; }
+.estado-carga { min-height: 160px; display: grid; place-content: center; }
+.sin-resultados { border: 1px dashed #bacbc2; background: #fff; border-radius: 16px; margin-top: 24px; padding: 40px 24px; }
+.sin-resultados p { max-width: 480px; margin-inline: auto; line-height: 1.6; }
+.cabecera button.enlace { border: 0; background: transparent; font: inherit; }
+.cabecera .logo { text-decoration: none; }
+.lienzo-firma { max-width: 100%; touch-action: none; }
+.acciones-firma, .estado-acciones { gap: 10px; flex-wrap: wrap; }
+mat-card { overflow-wrap: anywhere; }
+@media (max-width: 720px) {
+  .contenedor { padding: 20px 16px; }
+  .grilla-propiedades { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .estado-error { margin: 12px; flex-wrap: wrap; }
+  .cabecera.mat-toolbar { height: auto; min-height: 64px; padding: 12px; gap: 12px; flex-wrap: wrap; white-space: normal; }
+  .cabecera .usuario { display: none; }
+  .tarjeta-reserva-item, .tarjeta-visita-item { flex-wrap: wrap; }
+  .form-pago, .fila-pago { flex-wrap: wrap; }
+  .barra-filtros .campo-filtro { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }

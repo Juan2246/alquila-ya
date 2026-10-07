@@ -1,0 +1,26 @@
+.titulo-seccion { font-size: 26px; color: #222; margin-bottom: 16px; }
+
+.barra-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  background: #fff;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.08);
+}
+
+.campo-filtro { width: 180px; }
+
+.estado-carga {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+.sin-resultados {
+  text-align: center;
+  color: #717171;
+  padding: 60px 0;
+}

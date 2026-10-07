@@ -1,0 +1,71 @@
+<div class="estado-error" role="alert" *ngIf="errorCarga">
+  <mat-icon aria-hidden="true">error_outline</mat-icon><p>{{ errorCarga }}</p>
+  <button mat-stroked-button type="button" (click)="ngOnInit()">Reintentar</button>
+</div>
+<div class="pagina-centrada fondo-registro">
+  <mat-card class="tarjeta-formulario">
+    <div class="encabezado-marca">
+      <mat-icon>holiday_village</mat-icon>
+      <h1>Crear cuenta en AlquilaYa</h1>
+    </div>
+
+    <form [formGroup]="registroForm" (ngSubmit)="Registrarse()" class="form-columna">
+
+      <mat-form-field appearance="outline">
+        <mat-label>Quiero registrarme como</mat-label>
+        <mat-select formControlName="rol">
+          <mat-option value="ROLE_CLIENTE">Huésped (busco alojamiento)</mat-option>
+          <mat-option value="ROLE_PROPIETARIO">Anfitrión (quiero publicar propiedades)</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Usuario</mat-label>
+        <input matInput formControlName="username">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Contraseña</mat-label>
+        <input matInput type="password" formControlName="password">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre</mat-label>
+        <input matInput formControlName="nombre">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Apellido</mat-label>
+        <input matInput formControlName="apellido">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>DNI</mat-label>
+        <input matInput formControlName="dni">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Correo</mat-label>
+        <input matInput formControlName="correo" type="email">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Edad</mat-label>
+        <input matInput formControlName="edad" type="number">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Cuéntanos sobre ti (opcional)</mat-label>
+        <input matInput formControlName="descripcion">
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" type="submit" [disabled]="cargando">
+        {{ cargando ? 'Creando cuenta...' : 'Crear cuenta' }}
+      </button>
+
+      <p class="pie-form">
+        ¿Ya tienes cuenta? <a routerLink="/login">Ingresa aquí</a>
+      </p>
+    </form>
+  </mat-card>
+</div>
