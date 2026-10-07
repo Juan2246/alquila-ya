@@ -1,5 +1,6 @@
 package com.arqui.alquilaya.repositories;
 
+import com.arqui.alquilaya.entities.User;
 import com.arqui.alquilaya.entities.Propietario;
 import org.springframework.data.jpa.repository.JpaRepository;
 

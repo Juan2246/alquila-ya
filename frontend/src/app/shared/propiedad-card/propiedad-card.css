@@ -1,0 +1,48 @@
+.tarjeta-propiedad {
+  cursor: pointer;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  padding: 0;
+}
+
+.tarjeta-propiedad:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+.imagen-contenedor { position: relative; height: 170px; overflow: hidden; }
+
+.imagen-contenedor img { width: 100%; height: 100%; object-fit: cover; }
+
+.chip-distrito {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(255,255,255,0.92);
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #222;
+}
+
+.info-propiedad { padding: 14px; }
+
+.info-propiedad h3 { margin: 0 0 4px 0; font-size: 16px; color: #222; }
+
+.ubicacion, .detalles {
+  margin: 2px 0;
+  font-size: 13px;
+  color: #717171;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.precio { margin-top: 8px; font-size: 15px; color: #222; }
+
+.acciones-propietario {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}

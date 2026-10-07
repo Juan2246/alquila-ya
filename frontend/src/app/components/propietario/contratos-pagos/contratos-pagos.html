@@ -1,0 +1,63 @@
+<div class="estado-error" role="alert" *ngIf="errorCarga">
+  <mat-icon aria-hidden="true">error_outline</mat-icon><p>{{ errorCarga }}</p>
+  <button mat-stroked-button type="button" (click)="ngOnInit()">Reintentar</button>
+</div>
+<div class="contenedor">
+  <h1 class="titulo-seccion">Contratos y pagos</h1>
+
+  <div class="estado-carga" *ngIf="cargando">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div class="sin-resultados" *ngIf="!cargando && !errorCarga && listaContratos.length === 0">
+    <mat-icon>description</mat-icon>
+    <p>Todavía no se ha generado ningún contrato en tus propiedades.</p>
+  </div>
+
+  <div class="lista-contratos" *ngIf="!cargando">
+    <mat-card class="tarjeta-contrato-item" *ngFor="let contrato of listaContratos">
+      <div class="fila-principal" role="button" tabindex="0" [attr.aria-expanded]="contratoExpandidoId === contrato.id" (keydown.enter)="VerPagos(contrato.id)" (keydown.space)="$event.preventDefault(); VerPagos(contrato.id)" (click)="VerPagos(contrato.id)">
+        <div class="info-contrato">
+          <h3>{{ contrato.propiedad.titulo }}</h3>
+          <p>Huésped: {{ contrato.cliente.nombre }} {{ contrato.cliente.apellido }}</p>
+          <p>{{ contrato.fechaInicio | slice:0:10 }} → {{ contrato.fechaFin | slice:0:10 }}</p>
+        </div>
+        <mat-chip [ngClass]="contrato.estado === 'FIRMADO' ? 'estado-firmado' : 'estado-pendiente'">
+          {{ contrato.estado === 'FIRMADO' ? 'Firmado' : contrato.estado }}
+        </mat-chip>
+      </div>
+
+      <div class="seccion-pagos" *ngIf="contratoExpandidoId === contrato.id">
+        <h4>Pagos registrados</h4>
+        <p role="status" *ngIf="cargandoPagos">Cargando pagos…</p>
+        <p role="alert" *ngIf="errorPagos">No se pudieron consultar los pagos. Cierra y abre este contrato para reintentar.</p>
+        <div class="lista-pagos" *ngIf="pagosPorContrato[contrato.id]?.length">
+          <div class="fila-pago" *ngFor="let pago of pagosPorContrato[contrato.id]">
+            <span>S/. {{ pago.monto }}</span>
+            <span>{{ pago.metodo }}</span>
+            <span>{{ pago.fecha | slice:0:10 }}</span>
+            <mat-chip>{{ pago.estado }}</mat-chip>
+          </div>
+        </div>
+        <p class="sin-pagos" *ngIf="!cargandoPagos && !errorPagos && !pagosPorContrato[contrato.id]?.length">Aún no hay pagos registrados para este contrato.</p>
+
+        <p>Registro manual de pagos recibidos. Esta pantalla no realiza cobros bancarios.</p>
+        <form *ngIf="contrato.estado === 'FIRMADO'" [formGroup]="pagoForm" (ngSubmit)="RegistrarPago(contrato.id)" class="form-pago">
+          <mat-form-field appearance="outline">
+            <mat-label>Monto (S/.)</mat-label>
+            <input matInput type="number" formControlName="monto">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Método</mat-label>
+            <mat-select formControlName="metodo">
+              <mat-option value="Transferencia">Transferencia</mat-option>
+              <mat-option value="Efectivo">Efectivo</mat-option>
+              <mat-option value="Tarjeta">Tarjeta</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit" [disabled]="guardandoPago || pagoForm.invalid">{{ guardandoPago ? 'Guardando…' : 'Registrar pago recibido' }}</button>
+        </form>
+      </div>
+    </mat-card>
+  </div>
+</div>

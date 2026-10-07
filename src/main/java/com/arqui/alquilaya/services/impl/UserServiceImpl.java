@@ -1,6 +1,7 @@
 package com.arqui.alquilaya.services.impl;
 
 import com.arqui.alquilaya.dtos.PerfilDTO;
+import com.arqui.alquilaya.dtos.RegistroDTO;
 import com.arqui.alquilaya.dtos.UserDTO;
 import com.arqui.alquilaya.entities.Cliente;
 import com.arqui.alquilaya.entities.Propietario;
@@ -11,15 +12,15 @@ import com.arqui.alquilaya.services.ClienteService;
 import com.arqui.alquilaya.services.PropietarioService;
 import com.arqui.alquilaya.services.RolService;
 import com.arqui.alquilaya.services.UserService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 import java.nio.charset.StandardCharsets;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Implementación del servicio de usuarios para autenticación.
@@ -38,6 +39,27 @@ public class UserServiceImpl implements UserService {
     private final ClienteService clienteService;
 
     private final PropietarioService propietarioService;
+
+    @Override
+    @Transactional
+    public PerfilDTO registrar(RegistroDTO registro) {
+        UserDTO cuenta = add(new UserDTO(null, registro.getUsername().trim(), registro.getPassword(), registro.getRol()));
+        User user = userRepository.findById(cuenta.getId()).orElseThrow();
+        if ("ROLE_CLIENTE".equals(registro.getRol())) {
+            Cliente perfil = new Cliente();
+            perfil.setNombre(registro.getNombre()); perfil.setApellido(registro.getApellido());
+            perfil.setDni(registro.getDni()); perfil.setCorreo(registro.getCorreo());
+            perfil.setEdad(registro.getEdad()); perfil.setDescripcion(registro.getDescripcion());
+            perfil.setUser(user); clienteService.add(perfil);
+        } else {
+            Propietario perfil = new Propietario();
+            perfil.setNombre(registro.getNombre()); perfil.setApellido(registro.getApellido());
+            perfil.setDni(registro.getDni()); perfil.setCorreo(registro.getCorreo());
+            perfil.setEdad(registro.getEdad()); perfil.setObservaciones(registro.getDescripcion());
+            perfil.setUser(user); propietarioService.add(perfil);
+        }
+        return obtenerPerfil(user);
+    }
 
     @Override
     public User findById(Long id) {
@@ -75,6 +97,9 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Credenciales de registro no válidas");
         }
 
+        if (userRepository.findByUsername(userDTO.getUsername()) != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El nombre de usuario ya está registrado");
+        }
         User newUser = new User(null, userDTO.getUsername(),
                 new BCryptPasswordEncoder().encode(userDTO.getPassword()),
                 true, rolList);

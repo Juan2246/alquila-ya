@@ -1,0 +1,33 @@
+<div class="estado-error" role="alert" *ngIf="errorCarga">
+  <mat-icon aria-hidden="true">error_outline</mat-icon><p>{{ errorCarga }}</p>
+  <button mat-stroked-button type="button" (click)="ngOnInit()">Reintentar</button>
+</div>
+<div class="contenedor">
+  <h1 class="titulo-seccion">Visitas agendadas</h1>
+
+  <div class="estado-carga" *ngIf="cargando">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div class="sin-resultados" *ngIf="!cargando && !errorCarga && listaVisitas.length === 0">
+    <mat-icon>event_note</mat-icon>
+    <p>Nadie ha agendado una visita a tus propiedades todavía.</p>
+  </div>
+
+  <div class="lista-visitas" *ngIf="!cargando">
+    <mat-card class="tarjeta-visita-item" *ngFor="let visita of listaVisitas">
+      <div class="info-visita">
+        <h3>{{ visita.propiedad.titulo }}</h3>
+        <p>Solicitada por: {{ visita.cliente.nombre }} {{ visita.cliente.apellido }}</p>
+        <p>Fecha propuesta: {{ visita.fecha | slice:0:16 }}</p>
+      </div>
+      <div class="estado-acciones">
+        <mat-chip [ngClass]="'estado-' + visita.estado.toLowerCase()">{{ visita.estado }}</mat-chip>
+        <div class="botones" *ngIf="visita.estado === 'PENDIENTE'">
+          <button mat-stroked-button color="primary" (click)="Confirmar(visita.id)" [disabled]="!YaOcurrio(visita.fecha)">Marcar completada</button>
+          <button mat-stroked-button color="warn" (click)="Cancelar(visita.id)">Cancelar</button>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+</div>

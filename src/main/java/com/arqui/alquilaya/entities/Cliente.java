@@ -22,8 +22,11 @@ public class Cliente {
 
     private String nombre;
     private String apellido;
+    @JsonIgnore
     private String dni;
+    @JsonIgnore
     private String correo;
+    @JsonIgnore
     private Integer edad;
     private String foto;
     private String descripcion;
@@ -33,6 +36,7 @@ public class Cliente {
      */
     @OneToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     // Relaciones inversas (lado no-dueño) con las entidades del dominio

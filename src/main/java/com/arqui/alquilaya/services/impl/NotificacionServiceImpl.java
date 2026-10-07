@@ -3,11 +3,13 @@ package com.arqui.alquilaya.services.impl;
 import com.arqui.alquilaya.entities.Notificacion;
 import com.arqui.alquilaya.exceptions.ResourceNotFoundException;
 import com.arqui.alquilaya.repositories.NotificacionRepository;
+import com.arqui.alquilaya.security.AccesoActual;
+import com.arqui.alquilaya.services.ClienteService;
 import com.arqui.alquilaya.services.NotificacionService;
+import com.arqui.alquilaya.services.PropietarioService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * Implementación del servicio de notificaciones.
@@ -18,9 +20,19 @@ import java.util.List;
 public class NotificacionServiceImpl implements NotificacionService {
 
     private final NotificacionRepository notificacionRepository;
+    private final AccesoActual acceso;
+    private final ClienteService clientes;
+    private final PropietarioService propietarios;
+
+    @Override
+    public List<Notificacion> listByPropietarioId(Long id) {
+        acceso.exigirPropietario(propietarios.findById(id));
+        return notificacionRepository.findByPropietario_Id(id);
+    }
 
     @Override
     public List<Notificacion> listByClienteId(Long clienteId) {
+        acceso.exigirCliente(clientes.findById(clienteId));
         return notificacionRepository.findByCliente_Id(clienteId);
     }
 
@@ -38,6 +50,7 @@ public class NotificacionServiceImpl implements NotificacionService {
         if (found == null) {
             throw new ResourceNotFoundException("Notificación con id: " + id + " no encontrada");
         }
+        acceso.exigirDestinatario(found);
         found.setLeida(true);
         return notificacionRepository.save(found);
     }

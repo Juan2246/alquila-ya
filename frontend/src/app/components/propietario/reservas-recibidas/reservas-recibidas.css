@@ -1,0 +1,48 @@
+.titulo-seccion { font-size: 26px; color: #222; margin-bottom: 8px; }
+
+.estado-carga { display: flex; justify-content: center; padding: 60px 0; }
+
+.sin-resultados { text-align: center; color: #717171; padding: 60px 0; }
+
+.lista-reservas {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.tarjeta-reserva-item {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 20px;
+}
+
+.miniatura-propiedad {
+  width: 160px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.info-reserva { flex: 1; min-width: 0; }
+
+.info-reserva h3 { margin: 0 0 4px 0; }
+
+.info-reserva .precio { font-weight: 700; }
+
+.estado-acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.estado-pendiente { background: #fff3cd; }
+.estado-confirmada { background: #d1ecf1; }
+.estado-completada { background: #d4edda; }
+.estado-cancelada { background: #f8d7da; }

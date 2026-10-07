@@ -21,8 +21,11 @@ public class Propietario {
 
     private String nombre;
     private String apellido;
+    @JsonIgnore
     private String dni;
+    @JsonIgnore
     private String correo;
+    @JsonIgnore
     private Integer edad;
     private String foto;
     private String observaciones;
@@ -32,6 +35,7 @@ public class Propietario {
      */
     @OneToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     /**

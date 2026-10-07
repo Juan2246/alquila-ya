@@ -1,0 +1,12 @@
+.encabezado-lista {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.titulo-seccion { font-size: 26px; color: #222; }
+
+.estado-carga { display: flex; justify-content: center; padding: 60px 0; }
+
+.sin-resultados { text-align: center; color: #717171; padding: 60px 0; }

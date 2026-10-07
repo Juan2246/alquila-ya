@@ -1,0 +1,47 @@
+<div class="estado-error" role="alert" *ngIf="errorCarga">
+  <mat-icon aria-hidden="true">error_outline</mat-icon><p>{{ errorCarga }}</p>
+  <button mat-stroked-button type="button" (click)="ngOnInit()">Reintentar</button>
+</div>
+<div class="contenedor">
+  <h1 class="titulo-seccion">Mis reservas</h1>
+
+  <div class="estado-carga" *ngIf="cargando">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div class="sin-resultados" *ngIf="!cargando && !errorCarga && listaReservas.length === 0">
+    <mat-icon>event_busy</mat-icon>
+    <p>Todavía no tienes reservas. ¡Explora propiedades y reserva tu próxima estadía!</p>
+    <button mat-flat-button color="primary" routerLink="/inicio">Explorar propiedades</button>
+  </div>
+
+  <div class="lista-reservas" *ngIf="!cargando">
+    <mat-card class="tarjeta-reserva-item" *ngFor="let reserva of listaReservas">
+      <img class="miniatura-propiedad"
+           [src]="(reserva.propiedad.fotos && reserva.propiedad.fotos.length > 0) ? archivoUrl(reserva.propiedad.fotos[0].url) : imagenPorDefecto"
+           alt="{{ reserva.propiedad.titulo }}">
+      <div class="info-reserva">
+        <h3>{{ reserva.propiedad.titulo }}</h3>
+        <p>{{ reserva.fechaCheckIn }} → {{ reserva.fechaCheckOut }}</p>
+        <p class="precio">S/. {{ reserva.precioTotal }}</p>
+      </div>
+      <div class="estado-acciones">
+        <mat-chip [ngClass]="'estado-' + reserva.estado.toLowerCase()">{{ reserva.estado }}</mat-chip>
+        <button mat-stroked-button color="warn" *ngIf="reserva.estado === 'PENDIENTE' || reserva.estado === 'CONFIRMADA'" (click)="Cancelar(reserva.id)">
+          Cancelar
+        </button>
+      </div>
+    </mat-card>
+  </div>
+
+  <h1 class="titulo-seccion titulo-visitas" *ngIf="listaVisitas.length > 0">Mis visitas agendadas</h1>
+  <div class="lista-reservas" *ngIf="listaVisitas.length > 0">
+    <mat-card class="tarjeta-visita-cliente" *ngFor="let visita of listaVisitas">
+      <div class="info-reserva">
+        <h3>{{ visita.propiedad.titulo }}</h3>
+        <p>Fecha propuesta: {{ visita.fecha | slice:0:16 }}</p>
+      </div>
+      <mat-chip [ngClass]="'estado-' + visita.estado.toLowerCase()">{{ visita.estado }}</mat-chip>
+    </mat-card>
+  </div>
+</div>

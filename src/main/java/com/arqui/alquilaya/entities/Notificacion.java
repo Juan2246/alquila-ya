@@ -29,4 +29,8 @@ public class Notificacion {
     @ManyToOne
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
+
+    @ManyToOne
+    @JoinColumn(name = "propietario_id")
+    private Propietario propietario;
 }

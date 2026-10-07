@@ -1,0 +1,24 @@
+.fondo-registro {
+  min-height: 100vh;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #fff5f5 0%, #fff0e6 100%);
+}
+
+.encabezado-marca {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #e0393e;
+  text-align: center;
+}
+
+.encabezado-marca h1 { font-size: 20px; margin: 0; }
+
+.pie-form {
+  text-align: center;
+  font-size: 14px;
+  color: #717171;
+}
+
+.pie-form a { color: #e0393e; font-weight: 600; text-decoration: none; }

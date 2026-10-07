@@ -1,5 +1,6 @@
 package com.arqui.alquilaya.security;
 
+import com.arqui.alquilaya.entities.Rol;
 import com.arqui.alquilaya.entities.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;

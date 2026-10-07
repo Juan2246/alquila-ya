@@ -1,0 +1,39 @@
+<div class="estado-error" role="alert" *ngIf="errorCarga">
+  <mat-icon aria-hidden="true">error_outline</mat-icon><p>{{ errorCarga }}</p>
+  <button mat-stroked-button type="button" (click)="ngOnInit()">Reintentar</button>
+</div>
+<div class="pagina-centrada fondo-login">
+  <mat-card class="tarjeta-formulario">
+    <div class="encabezado-marca">
+      <mat-icon>holiday_village</mat-icon>
+      <h1>AlquilaYa</h1>
+    </div>
+    <p class="subtitulo">Encuentra el lugar perfecto para tu próxima estadía</p>
+
+    <form [formGroup]="loginForm" (ngSubmit)="Ingresar()" class="form-columna">
+      <mat-form-field appearance="outline">
+        <mat-label>Usuario</mat-label>
+        <input matInput formControlName="username">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Contraseña</mat-label>
+        <input matInput formControlName="password" type="password">
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" type="submit" [disabled]="cargando">
+        {{ cargando ? 'Ingresando...' : 'Ingresar' }}
+      </button>
+
+      <p class="pie-form">
+        ¿No tienes cuenta? <a routerLink="/registro">Regístrate aquí</a>
+      </p>
+    </form>
+
+    <div class="ayuda-demo">
+      <b>Cuentas de prueba:</b><br>
+      Propietario: propietario1 / pass<br>
+      Cliente: cliente1 / pass
+    </div>
+  </mat-card>
+</div>

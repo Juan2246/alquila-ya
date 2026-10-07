@@ -1,28 +1,34 @@
 package com.arqui.alquilaya.services.impl;
 
-import com.arqui.alquilaya.dtos.ReservaDTO;
 import com.arqui.alquilaya.dtos.DisponibilidadDTO;
-import com.arqui.alquilaya.security.AccesoActual;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
+import com.arqui.alquilaya.dtos.ReservaDTO;
 import com.arqui.alquilaya.entities.Cliente;
+import com.arqui.alquilaya.entities.Contrato;
+import com.arqui.alquilaya.entities.Notificacion;
 import com.arqui.alquilaya.entities.Propiedad;
 import com.arqui.alquilaya.entities.Reserva;
 import com.arqui.alquilaya.exceptions.ResourceNotFoundException;
+import com.arqui.alquilaya.repositories.ContratoRepository;
+import com.arqui.alquilaya.repositories.NotificacionRepository;
+import com.arqui.alquilaya.repositories.PropiedadRepository;
 import com.arqui.alquilaya.repositories.ReservaRepository;
+import com.arqui.alquilaya.security.AccesoActual;
 import com.arqui.alquilaya.services.ClienteService;
 import com.arqui.alquilaya.services.PropiedadService;
 import com.arqui.alquilaya.services.ReservaService;
 import jakarta.validation.ValidationException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Implementación del servicio de reservas.
@@ -30,6 +36,7 @@ import java.util.List;
  * y cálculo automático del precio total.
  */
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ReservaServiceImpl implements ReservaService {
 
@@ -40,6 +47,10 @@ public class ReservaServiceImpl implements ReservaService {
     private final PropiedadService propiedadService;
 
     private final AccesoActual acceso;
+    private final Clock reloj;
+    private final ContratoRepository contratos;
+    private final PropiedadRepository propiedades;
+    private final NotificacionRepository notificaciones;
 
     @Override
     public Reserva findById(Long id) {
@@ -88,7 +99,8 @@ public class ReservaServiceImpl implements ReservaService {
             throw new ResourceNotFoundException("Cliente con id: " + reservaDTO.getClienteId() + " no encontrado");
         }
         acceso.exigirCliente(cliente);
-        Propiedad propiedad = propiedadService.findById(reservaDTO.getPropiedadId());
+        Propiedad propiedad = propiedades.bloquearPorId(reservaDTO.getPropiedadId())
+                .orElseThrow(() -> new ResourceNotFoundException("Propiedad no encontrada"));
 
         // Paso 2: Validar fechas
         LocalDate checkIn = LocalDate.parse(reservaDTO.getFechaCheckIn());
@@ -97,7 +109,7 @@ public class ReservaServiceImpl implements ReservaService {
         if (!checkOut.isAfter(checkIn)) {
             throw new ValidationException("La fecha de check-out debe ser posterior a la fecha de check-in");
         }
-        if (checkIn.isBefore(LocalDate.now())) {
+        if (checkIn.isBefore(LocalDate.now(reloj))) {
             throw new ValidationException("La fecha de check-in no puede ser en el pasado");
         }
 
@@ -120,10 +132,17 @@ public class ReservaServiceImpl implements ReservaService {
         Reserva newReserva = new Reserva(
                 null, checkIn, checkOut,
                 "PENDIENTE", precioTotal,
-                LocalDateTime.now(),
+                LocalDateTime.now(reloj),
                 cliente, propiedad
         );
         newReserva = reservaRepository.save(newReserva);
+
+        Contrato contrato = new Contrato();
+        contrato.setCliente(cliente); contrato.setPropiedad(propiedad); contrato.setReserva(newReserva);
+        contrato.setFechaInicio(checkIn.atStartOfDay()); contrato.setFechaFin(checkOut.atStartOfDay());
+        contrato.setEstado("PENDIENTE");
+        reservaDTO.setContratoId(contratos.save(contrato).getId());
+        notificar(newReserva, true, "Nueva solicitud de reserva");
 
         // Mapear respuesta
         reservaDTO.setId(newReserva.getId());
@@ -151,7 +170,29 @@ public class ReservaServiceImpl implements ReservaService {
         if (!acceso.esPropietario(found.getPropiedad().getPropietario()) && !"CANCELADA".equals(estado)) {
             throw new AccessDeniedException("Solo el propietario puede confirmar o completar la reserva");
         }
+        if (estado.equals(found.getEstado())) return found;
+        boolean permitida = ("PENDIENTE".equals(found.getEstado()) && List.of("CONFIRMADA", "CANCELADA").contains(estado))
+                || ("CONFIRMADA".equals(found.getEstado()) && List.of("COMPLETADA", "CANCELADA").contains(estado));
+        if (!permitida) throw new ResponseStatusException(HttpStatus.CONFLICT, "La reserva no admite ese cambio de estado");
+        var contrato = contratos.findByReserva_Id(found.getId());
+        if ("COMPLETADA".equals(estado) && (contrato.isEmpty() || !"FIRMADO".equals(contrato.get().getEstado())
+                || found.getFechaCheckOut().isAfter(LocalDate.now(reloj))))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Completa la estancia después del check-out y con contrato firmado");
+        contrato.ifPresent(c -> c.setEstado(switch (estado) {
+            case "CONFIRMADA" -> "ACTIVO";
+            case "COMPLETADA" -> "FINALIZADO";
+            default -> "CANCELADO";
+        }));
         found.setEstado(estado);
+        notificar(found, acceso.esCliente(found.getCliente()), "Reserva " + estado.toLowerCase());
         return reservaRepository.save(found);
+    }
+    private void notificar(Reserva reserva, boolean alPropietario, String titulo) {
+        var aviso = new Notificacion();
+        aviso.setTitulo(titulo); aviso.setMensaje(reserva.getPropiedad().getTitulo());
+        aviso.setFecha(LocalDateTime.now(reloj)); aviso.setLeida(false);
+        if (alPropietario) aviso.setPropietario(reserva.getPropiedad().getPropietario());
+        else aviso.setCliente(reserva.getCliente());
+        notificaciones.save(aviso);
     }
 }

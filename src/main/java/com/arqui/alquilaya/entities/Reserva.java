@@ -1,13 +1,13 @@
 package com.arqui.alquilaya.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Entidad que representa una reserva de una propiedad.
@@ -49,4 +49,15 @@ public class Reserva {
     @ManyToOne
     @JoinColumn(name = "propiedad_id")
     private Propiedad propiedad;
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "reserva", fetch = FetchType.LAZY)
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
+    private Contrato contrato;
+
+    public Reserva(Long id, LocalDate entrada, LocalDate salida, String estado, BigDecimal total,
+                   LocalDateTime creacion, Cliente cliente, Propiedad propiedad) {
+        this(id, entrada, salida, estado, total, creacion, cliente, propiedad, null);
+    }
 }

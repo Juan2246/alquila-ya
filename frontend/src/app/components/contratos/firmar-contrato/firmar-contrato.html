@@ -1,0 +1,52 @@
+<div class="estado-error" role="alert" *ngIf="errorCarga">
+  <mat-icon aria-hidden="true">error_outline</mat-icon><p>{{ errorCarga }}</p>
+  <button mat-stroked-button type="button" (click)="ngOnInit()">Reintentar</button>
+</div>
+<div class="contenedor" *ngIf="!cargando && contrato">
+  <a class="volver" routerLink="/mis-reservas"><mat-icon>arrow_back</mat-icon> Volver a mis reservas</a>
+
+  <mat-card class="tarjeta-contrato">
+    <h1>Contrato de alquiler</h1>
+    <p class="subtitulo">Revisa los datos antes de firmar</p>
+
+    <div class="datos-contrato">
+      <p><b>Propiedad:</b> {{ contrato.propiedad.titulo }}</p>
+      <p><b>Huésped:</b> {{ contrato.cliente.nombre }} {{ contrato.cliente.apellido }}</p>
+      <p><b>Desde:</b> {{ contrato.fechaInicio | slice:0:10 }}</p>
+      <p><b>Hasta:</b> {{ contrato.fechaFin | slice:0:10 }}</p>
+      <p><b>Estado:</b> {{ contrato.estado }}</p>
+    </div>
+
+    <div *ngIf="contrato.estado === 'ACTIVO' && userService.esCliente()">
+      <h3>Firma aquí</h3>
+      <canvas #lienzoFirma aria-label="Área para dibujar tu firma"
+        width="500" height="200"
+        class="lienzo-firma"
+        (mousedown)="IniciarTrazo($event)"
+        (mousemove)="Dibujar($event)"
+        (mouseup)="TerminarTrazo()"
+        (mouseleave)="TerminarTrazo()"
+        (touchstart)="IniciarTrazo($event)"
+        (touchmove)="Dibujar($event)"
+        (touchend)="TerminarTrazo()">
+      </canvas>
+
+      <div class="acciones-firma">
+        <button mat-stroked-button type="button" (click)="Limpiar()">Limpiar</button>
+        <button mat-flat-button color="primary" type="button" (click)="ConfirmarFirma()" [disabled]="firmando">
+          {{ firmando ? 'Guardando...' : 'Confirmar firma' }}
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="contrato.estado === 'FIRMADO'" class="ya-firmado">
+      <mat-icon>check_circle</mat-icon>
+      <p>Este contrato ya fue firmado.</p>
+      <img *ngIf="firmaUrl" [src]="firmaUrl" alt="Firma del huésped" class="imagen-firma">
+    </div>
+  </mat-card>
+</div>
+
+<div class="estado-carga" *ngIf="cargando">
+  <mat-spinner diameter="36"></mat-spinner>
+</div>

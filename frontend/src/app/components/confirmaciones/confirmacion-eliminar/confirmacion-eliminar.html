@@ -1,0 +1,9 @@
+<mat-dialog-content>
+  <h2 mat-dialog-title>Eliminar</h2>
+  <p>¿Estás seguro de eliminar esta propiedad?</p>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-button (click)="Respuesta(false)">No</button>
+  <button mat-flat-button color="warn" (click)="Respuesta(true)">Sí, eliminar</button>
+</mat-dialog-actions>

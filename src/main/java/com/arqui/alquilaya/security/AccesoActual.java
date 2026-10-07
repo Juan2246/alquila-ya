@@ -1,5 +1,12 @@
 package com.arqui.alquilaya.security;
 
+import com.arqui.alquilaya.entities.Cliente;
+import com.arqui.alquilaya.entities.Contrato;
+import com.arqui.alquilaya.entities.Notificacion;
+import com.arqui.alquilaya.entities.Propietario;
+import com.arqui.alquilaya.entities.Reserva;
+import com.arqui.alquilaya.entities.User;
+import com.arqui.alquilaya.entities.Visita;
 import com.arqui.alquilaya.entities.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,6 +54,21 @@ public class AccesoActual {
                 || !esPropietario(reserva.getPropiedad().getPropietario()))) {
             throw new AccessDeniedException("No puedes acceder a esa reserva");
         }
+    }
+
+    public void exigirParticipante(Contrato contrato) {
+        if (!esCliente(contrato.getCliente()) && !esPropietario(contrato.getPropiedad().getPropietario()))
+            throw new AccessDeniedException("No puedes acceder a ese contrato");
+    }
+
+    public void exigirParticipante(Visita visita) {
+        if (!esCliente(visita.getCliente()) && !esPropietario(visita.getPropiedad().getPropietario()))
+            throw new AccessDeniedException("No puedes acceder a esa visita");
+    }
+
+    public void exigirDestinatario(Notificacion notificacion) {
+        if (!esCliente(notificacion.getCliente()) && !esPropietario(notificacion.getPropietario()))
+            throw new AccessDeniedException("No puedes acceder a esa notificación");
     }
 
     public void exigirConsulta() {

@@ -1,0 +1,92 @@
+<div class="estado-error" role="alert" *ngIf="errorCarga">
+  <mat-icon aria-hidden="true">error_outline</mat-icon><p>{{ errorCarga }}</p>
+  <button mat-stroked-button type="button" (click)="Guardar()">Reintentar</button>
+</div>
+<div class="pagina-centrada">
+  <mat-card class="tarjeta-formulario-ancha">
+    <h1>{{ id > 0 ? 'Editar propiedad' : 'Publicar una propiedad' }}</h1>
+
+    <form [formGroup]="publicarForm" (ngSubmit)="Guardar()" class="form-columna">
+
+      <mat-form-field appearance="outline">
+        <mat-label>Título</mat-label>
+        <input matInput formControlName="titulo" placeholder="Ej. Departamento moderno en Miraflores">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Descripción</mat-label>
+        <input matInput formControlName="descripcion" placeholder="Describe tu propiedad">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Dirección / ubicación</mat-label>
+        <input matInput formControlName="ubicacion">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Distrito</mat-label>
+        <input matInput formControlName="distrito">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Precio por noche (S/.)</mat-label>
+        <input matInput type="number" formControlName="precio">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Número de habitaciones</mat-label>
+        <input matInput type="number" formControlName="habitaciones">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Capacidad (huéspedes)</mat-label>
+        <input matInput type="number" formControlName="capacidad">
+      </mat-form-field>
+
+      <h3>Comodidades</h3>
+      <div class="lista-checks">
+        <mat-checkbox
+          *ngFor="let comodidad of listaComodidades"
+          [checked]="comodidadesSeleccionadas.has(comodidad.id)"
+          (change)="ToggleComodidad(comodidad.id, $event)">
+          {{ comodidad.nombre }}
+        </mat-checkbox>
+      </div>
+
+      <h3>Foto de la propiedad</h3>
+      <div class="seccion-foto">
+        <img *ngIf="previsualizacionUrl" [src]="previsualizacionUrl" class="previsualizacion-foto">
+        <img *ngIf="!previsualizacionUrl && fotoActualUrl" [src]="fotoActualUrl" class="previsualizacion-foto">
+        <input type="file" accept="image/png,image/jpeg" (change)="SeleccionarArchivo($event)">
+      </div>
+
+      <h3>Reglas de la propiedad (opcional)</h3>
+      <div class="seccion-clausulas">
+        <div class="fila-clausula" *ngFor="let clausula of clausulasExistentes">
+          <span>{{ clausula.texto }}</span>
+          <button mat-icon-button type="button" aria-label="Eliminar regla" [disabled]="guardando" (click)="EliminarClausulaExistente(clausula)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="fila-clausula" *ngFor="let texto of clausulasNuevas; let i = index">
+          <span>{{ texto }}</span>
+          <button mat-icon-button type="button" aria-label="Eliminar regla" [disabled]="guardando" (click)="EliminarClausulaNueva(i)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="agregar-clausula">
+          <mat-form-field appearance="outline" class="campo-clausula">
+            <mat-label>Ej. No se permiten mascotas</mat-label>
+            <input matInput [(ngModel)]="nuevaClausulaTexto" [ngModelOptions]="{standalone: true}">
+          </mat-form-field>
+          <button mat-stroked-button type="button" (click)="AgregarClausula()">Agregar regla</button>
+        </div>
+      </div>
+
+      <button mat-flat-button color="primary" type="submit" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : (id > 0 ? 'Guardar cambios' : 'Publicar propiedad') }}
+      </button>
+    </form>
+  </mat-card>
+</div>

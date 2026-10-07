@@ -1,12 +1,16 @@
 package com.arqui.alquilaya.controllers;
 
+import org.springframework.web.bind.annotation.*;
 import com.arqui.alquilaya.dtos.PerfilDTO;
+import com.arqui.alquilaya.dtos.RegistroDTO;
 import com.arqui.alquilaya.dtos.TokenDTO;
 import com.arqui.alquilaya.dtos.UserDTO;
 import com.arqui.alquilaya.entities.User;
 import com.arqui.alquilaya.security.JwtUtilService;
 import com.arqui.alquilaya.security.UserSecurity;
 import com.arqui.alquilaya.services.UserService;
+import jakarta.validation.Valid;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,13 +18,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.stream.Collectors;
-
 
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/alquilaya")
 @RequiredArgsConstructor
 public class UserController {
@@ -34,6 +33,11 @@ public class UserController {
     private final JwtUtilService jwtUtilService;
 
 
+
+    @PostMapping("/users/registro-completo")
+    public ResponseEntity<PerfilDTO> registroCompleto(@Valid @RequestBody RegistroDTO registro) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.registrar(registro));
+    }
 
     @PostMapping("/users/register")
     public ResponseEntity<UserDTO> register(@RequestBody UserDTO user) {

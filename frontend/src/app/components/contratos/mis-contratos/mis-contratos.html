@@ -1,0 +1,33 @@
+<div class="estado-error" role="alert" *ngIf="errorCarga">
+  <mat-icon aria-hidden="true">error_outline</mat-icon><p>{{ errorCarga }}</p>
+  <button mat-stroked-button type="button" (click)="ngOnInit()">Reintentar</button>
+</div>
+<div class="contenedor">
+  <h1 class="titulo-seccion">Mis contratos</h1>
+
+  <div class="estado-carga" *ngIf="cargando">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div class="sin-resultados" *ngIf="!cargando && !errorCarga && listaContratos.length === 0">
+    <mat-icon>description</mat-icon>
+    <p>Todavía no tienes contratos generados. Se crean automáticamente al hacer una reserva.</p>
+  </div>
+
+  <div class="lista-contratos" *ngIf="!cargando">
+    <mat-card class="tarjeta-contrato-item" *ngFor="let contrato of listaContratos">
+      <div class="info-contrato">
+        <h3>{{ contrato.propiedad.titulo }}</h3>
+        <p>{{ contrato.fechaInicio | slice:0:10 }} → {{ contrato.fechaFin | slice:0:10 }}</p>
+      </div>
+      <div class="estado-acciones">
+        <mat-chip [ngClass]="contrato.estado === 'FIRMADO' ? 'estado-firmado' : 'estado-pendiente'">
+          {{ contrato.estado }}
+        </mat-chip>
+        <button mat-flat-button color="primary" *ngIf="contrato.estado === 'ACTIVO'" (click)="Firmar(contrato.id)">
+          Firmar contrato
+        </button>
+      </div>
+    </mat-card>
+  </div>
+</div>

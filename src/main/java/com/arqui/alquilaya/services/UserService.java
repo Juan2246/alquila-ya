@@ -1,6 +1,7 @@
 package com.arqui.alquilaya.services;
 
 import com.arqui.alquilaya.dtos.PerfilDTO;
+import com.arqui.alquilaya.dtos.RegistroDTO;
 import com.arqui.alquilaya.dtos.UserDTO;
 import com.arqui.alquilaya.entities.User;
 
@@ -9,6 +10,7 @@ import com.arqui.alquilaya.entities.User;
  * Maneja registro de nuevos usuarios y búsqueda para login.
  */
 public interface UserService {
+    PerfilDTO registrar(RegistroDTO registro);
     public User findById(Long id);
     public User findByUsername(String username);
     public UserDTO add(UserDTO userDTO);

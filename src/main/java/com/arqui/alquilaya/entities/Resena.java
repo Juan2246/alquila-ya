@@ -40,4 +40,7 @@ public class Resena {
     @ManyToOne
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
+
+    @Column(length = 2000)
+    private String respuestaPropietario;
 }

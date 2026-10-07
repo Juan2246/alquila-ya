@@ -1,0 +1,36 @@
+.titulo-seccion { font-size: 26px; color: #222; margin-bottom: 8px; }
+
+.estado-carga { display: flex; justify-content: center; padding: 60px 0; }
+
+.sin-resultados { text-align: center; color: #717171; padding: 60px 0; }
+
+.grilla-metricas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.tarjeta-metrica {
+  text-align: center;
+  padding: 28px 16px;
+}
+
+.tarjeta-metrica mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  color: #e0393e;
+}
+
+.valor-metrica {
+  font-size: 28px;
+  font-weight: 700;
+  color: #222;
+  margin: 8px 0 4px 0;
+}
+
+.etiqueta-metrica {
+  color: #717171;
+  font-size: 14px;
+}

@@ -16,8 +16,9 @@ class DemoSeguridadTests {
     private final PropietarioRepository propietarios = mock(PropietarioRepository.class);
     private final PropiedadRepository propiedades = mock(PropiedadRepository.class);
     private final ReservaRepository reservas = mock(ReservaRepository.class);
+    private final ContratoRepository contratos = mock(ContratoRepository.class);
     private final PasswordEncoder encoder = mock(PasswordEncoder.class);
-    private final DataSeeder demo = new DataSeeder(usuarios, roles, clientes, propietarios, propiedades, reservas, encoder);
+    private final DataSeeder demo = new DataSeeder(usuarios, roles, clientes, propietarios, propiedades, reservas, contratos, encoder);
 
     @Test
     void demoSinClavesNoCreaNingunDato() {
@@ -25,7 +26,7 @@ class DemoSeguridadTests {
         setField(demo, "claveCliente", "");
         assertThatThrownBy(() -> demo.run()).isInstanceOf(IllegalStateException.class);
         verify(usuarios, never()).save(any());
-        verifyNoInteractions(roles, clientes, propietarios, propiedades, reservas, encoder);
+        verifyNoInteractions(roles, clientes, propietarios, propiedades, reservas, contratos, encoder);
     }
 
     @Test
@@ -33,6 +34,6 @@ class DemoSeguridadTests {
         when(usuarios.count()).thenReturn(1L);
         demo.run();
         verify(usuarios, never()).save(any());
-        verifyNoInteractions(roles, clientes, propietarios, propiedades, reservas, encoder);
+        verifyNoInteractions(roles, clientes, propietarios, propiedades, reservas, contratos, encoder);
     }
 }

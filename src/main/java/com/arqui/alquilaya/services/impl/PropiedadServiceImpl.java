@@ -1,28 +1,35 @@
 package com.arqui.alquilaya.services.impl;
 
 import com.arqui.alquilaya.dtos.CotizacionDTO;
-import com.arqui.alquilaya.security.AccesoActual;
 import com.arqui.alquilaya.dtos.PropiedadDTO;
 import com.arqui.alquilaya.entities.Comodidad;
 import com.arqui.alquilaya.entities.Propiedad;
+import com.arqui.alquilaya.entities.PropiedadClausula;
+import com.arqui.alquilaya.entities.PropiedadFoto;
 import com.arqui.alquilaya.entities.Propietario;
 import com.arqui.alquilaya.exceptions.ResourceNotFoundException;
 import com.arqui.alquilaya.repositories.ComodidadRepository;
+import com.arqui.alquilaya.repositories.PropiedadClausulaRepository;
+import com.arqui.alquilaya.repositories.PropiedadFotoRepository;
 import com.arqui.alquilaya.repositories.PropiedadRepository;
+import com.arqui.alquilaya.security.AccesoActual;
+import com.arqui.alquilaya.services.FileStorageService;
 import com.arqui.alquilaya.services.PropiedadService;
 import com.arqui.alquilaya.services.PropietarioService;
 import com.arqui.alquilaya.specifications.PropiedadSpecification;
 import jakarta.validation.ValidationException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implementación del servicio de propiedades.
@@ -30,6 +37,7 @@ import java.util.List;
  * Incluye buscador avanzado con filtros dinámicos y cotizador automático.
  */
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class PropiedadServiceImpl implements PropiedadService {
 
@@ -40,6 +48,54 @@ public class PropiedadServiceImpl implements PropiedadService {
     private final ComodidadRepository comodidadRepository;
 
     private final AccesoActual acceso;
+    private final PropiedadFotoRepository fotos;
+    private final PropiedadClausulaRepository clausulas;
+    private final FileStorageService archivos;
+
+    @Override
+    public PropiedadFoto agregarFoto(Long id, String url) {
+        Propiedad propiedad = findById(id); acceso.exigirPropietario(propiedad.getPropietario());
+        archivos.validarFotoPropia(url);
+        var existente = propiedad.getFotos() == null ? Optional.<PropiedadFoto>empty()
+                : propiedad.getFotos().stream().filter(f -> url.equals(f.getUrl())).findFirst();
+        return existente.orElseGet(() -> fotos.save(new PropiedadFoto(null, url, propiedad)));
+    }
+
+    @Override
+    public PropiedadClausula agregarClausula(Long id, String texto) {
+        Propiedad propiedad = findById(id); acceso.exigirPropietario(propiedad.getPropietario());
+        if (texto == null || texto.isBlank() || texto.length() > 250)
+            throw new ValidationException("La cláusula debe tener entre 1 y 250 caracteres");
+        var existente = propiedad.getClausulas() == null ? Optional.<PropiedadClausula>empty()
+                : propiedad.getClausulas().stream().filter(c -> texto.trim().equals(c.getTexto())).findFirst();
+        if (existente.isPresent()) return existente.get();
+        return clausulas.save(new PropiedadClausula(null, texto.trim(), propiedad));
+    }
+
+    @Override
+    public void eliminarClausula(Long id, Long clausulaId) {
+        acceso.exigirPropietario(findById(id).getPropietario());
+        var clausula = clausulas.findById(clausulaId).orElseThrow(() -> new ResourceNotFoundException("Cláusula no encontrada"));
+        if (!id.equals(clausula.getPropiedad().getId())) throw new ResourceNotFoundException("Cláusula no encontrada en esta propiedad");
+        clausulas.delete(clausula);
+    }
+
+    @Override
+    public Propiedad updateDTO(PropiedadDTO entrada) {
+        Propiedad datos = new Propiedad(); datos.setId(entrada.getId());
+        datos.setTitulo(entrada.getTitulo()); datos.setDescripcion(entrada.getDescripcion());
+        datos.setUbicacion(entrada.getUbicacion()); datos.setDistrito(entrada.getDistrito());
+        datos.setPrecio(entrada.getPrecio()); datos.setHabitaciones(entrada.getHabitaciones());
+        datos.setCapacidad(entrada.getCapacidad()); datos.setLatitud(entrada.getLatitud()); datos.setLongitud(entrada.getLongitud());
+        Propiedad propiedad = update(datos);
+        if (entrada.getComodidadIds() != null) {
+            var seleccion = comodidadRepository.findAllById(entrada.getComodidadIds());
+            if (seleccion.size() != new HashSet<>(entrada.getComodidadIds()).size())
+                throw new ValidationException("Hay comodidades que no existen");
+            propiedad.setComodidades(seleccion);
+        }
+        return propiedadRepository.save(propiedad);
+    }
 
     /**
      * Guarda una propiedad en la base de datos después de validar campos obligatorios.
@@ -144,6 +200,8 @@ public class PropiedadServiceImpl implements PropiedadService {
         List<Comodidad> comodidades = new ArrayList<>();
         if (propiedadDTO.getComodidadIds() != null && !propiedadDTO.getComodidadIds().isEmpty()) {
             comodidades = comodidadRepository.findAllById(propiedadDTO.getComodidadIds());
+            if (comodidades.size() != new HashSet<>(propiedadDTO.getComodidadIds()).size())
+                throw new ValidationException("Hay comodidades que no existen");
         }
 
         Propiedad newPropiedad = new Propiedad(
@@ -205,6 +263,10 @@ public class PropiedadServiceImpl implements PropiedadService {
         if (propiedad.getLongitud() != null) {
             found.setLongitud(propiedad.getLongitud());
         }
+        if ((found.getPrecio() != null && found.getPrecio().signum() <= 0)
+                || (found.getCapacidad() != null && found.getCapacidad() <= 0)
+                || (found.getHabitaciones() != null && found.getHabitaciones() <= 0))
+            throw new ValidationException("Precio, capacidad y habitaciones deben ser positivos");
         return propiedadRepository.save(found);
     }
 

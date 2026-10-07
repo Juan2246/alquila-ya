@@ -46,3 +46,11 @@ uploads/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Cachés y evidencias locales de verificación
+.review/
+.npm-cache/
+.m2/
+node_modules/
+.angular/
+dist/

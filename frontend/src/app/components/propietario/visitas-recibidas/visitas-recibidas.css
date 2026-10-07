@@ -1,0 +1,38 @@
+.titulo-seccion { font-size: 26px; color: #222; margin-bottom: 8px; }
+
+.estado-carga { display: flex; justify-content: center; padding: 60px 0; }
+
+.sin-resultados { text-align: center; color: #717171; padding: 60px 0; }
+
+.lista-visitas {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.tarjeta-visita-item {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 20px;
+}
+
+.info-visita { flex: 1; min-width: 0; }
+.info-visita h3 { margin: 0 0 4px 0; }
+
+.estado-acciones {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.botones { display: flex; gap: 8px; }
+
+.estado-pendiente { background: #fff3cd; }
+.estado-completada { background: #d4edda; }
+.estado-cancelada { background: #f8d7da; }

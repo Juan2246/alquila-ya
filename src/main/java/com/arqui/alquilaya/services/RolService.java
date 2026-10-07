@@ -1,5 +1,6 @@
 package com.arqui.alquilaya.services;
 
+import com.arqui.alquilaya.services.impl.RolServiceImpl;
 import com.arqui.alquilaya.entities.Rol;
 
 /**
