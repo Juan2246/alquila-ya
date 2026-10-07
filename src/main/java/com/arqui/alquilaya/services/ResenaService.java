@@ -1,5 +1,6 @@
 package com.arqui.alquilaya.services;
 
+import com.arqui.alquilaya.services.impl.ResenaServiceImpl;
 import com.arqui.alquilaya.dtos.ResenaDTO;
 import com.arqui.alquilaya.entities.Resena;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
  * de que el cliente debe tener una visita completada antes de crear una reseña.
  */
 public interface ResenaService {
+    Resena responder(Long id, String respuesta);
     public Resena findById(Long id);
     public List<Resena> listByPropiedadId(Long propiedadId);
     public ResenaDTO addDTO(ResenaDTO resenaDTO);

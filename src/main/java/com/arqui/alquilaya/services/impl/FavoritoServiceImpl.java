@@ -9,6 +9,7 @@ import com.arqui.alquilaya.repositories.FavoritoRepository;
 import com.arqui.alquilaya.services.ClienteService;
 import com.arqui.alquilaya.services.FavoritoService;
 import com.arqui.alquilaya.services.PropiedadService;
+import com.arqui.alquilaya.security.AccesoActual;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,9 +27,11 @@ public class FavoritoServiceImpl implements FavoritoService {
     private final FavoritoRepository favoritoRepository;
     private final ClienteService clienteService;
     private final PropiedadService propiedadService;
+    private final AccesoActual acceso;
 
     @Override
     public List<Favorito> listByClienteId(Long clienteId) {
+        acceso.exigirCliente(clienteService.findById(clienteId));
         return favoritoRepository.findByCliente_Id(clienteId);
     }
 
@@ -38,6 +41,7 @@ public class FavoritoServiceImpl implements FavoritoService {
         if (cliente == null) {
             throw new ResourceNotFoundException("Cliente con id: " + favoritoDTO.getClienteId() + " no encontrado");
         }
+        acceso.exigirCliente(cliente);
         Propiedad propiedad = propiedadService.findById(favoritoDTO.getPropiedadId());
 
         Favorito newFavorito = new Favorito(null, LocalDateTime.now(), cliente, propiedad);
@@ -50,9 +54,9 @@ public class FavoritoServiceImpl implements FavoritoService {
 
     @Override
     public void delete(Long id) {
-        if (!favoritoRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Favorito con id: " + id + " no encontrado");
-        }
+        Favorito favorito = favoritoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Favorito no encontrado"));
+        acceso.exigirCliente(favorito.getCliente());
         favoritoRepository.deleteById(id);
     }
 }

@@ -1,5 +1,16 @@
 package com.arqui.alquilaya.config;
 
+import com.arqui.alquilaya.entities.Cliente;
+import com.arqui.alquilaya.entities.Propiedad;
+import com.arqui.alquilaya.entities.Propietario;
+import com.arqui.alquilaya.entities.Reserva;
+import com.arqui.alquilaya.entities.User;
+import com.arqui.alquilaya.repositories.ClienteRepository;
+import com.arqui.alquilaya.repositories.PropiedadRepository;
+import com.arqui.alquilaya.repositories.PropietarioRepository;
+import com.arqui.alquilaya.repositories.ReservaRepository;
+import com.arqui.alquilaya.repositories.RolRepository;
+import com.arqui.alquilaya.repositories.UserRepository;
 import com.arqui.alquilaya.entities.*;
 import com.arqui.alquilaya.repositories.*;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +39,7 @@ public class DataSeeder implements CommandLineRunner {
     private final PropietarioRepository propietarios;
     private final PropiedadRepository propiedades;
     private final ReservaRepository reservas;
+    private final ContratoRepository contratos;
     private final PasswordEncoder encoder;
 
     @Value("${demo.propietario.password:}")
@@ -67,8 +79,14 @@ public class DataSeeder implements CommandLineRunner {
         propiedad.setFechaPublicacion(LocalDateTime.now());
         propiedad.setPropietario(propietario);
         propiedades.save(propiedad);
-        reservas.save(new Reserva(null, LocalDate.now().plusDays(10), LocalDate.now().plusDays(13),
+        Reserva reserva = reservas.save(new Reserva(null, LocalDate.now().plusDays(10), LocalDate.now().plusDays(13),
                 "PENDIENTE", BigDecimal.valueOf(300), LocalDateTime.now(), cliente, propiedad));
+        Contrato contrato = new Contrato();
+        contrato.setReserva(reserva); contrato.setCliente(cliente); contrato.setPropiedad(propiedad);
+        contrato.setFechaInicio(reserva.getFechaCheckIn().atStartOfDay());
+        contrato.setFechaFin(reserva.getFechaCheckOut().atStartOfDay());
+        contrato.setEstado("PENDIENTE");
+        contratos.save(contrato);
     }
 
     private User crearUsuario(String nombre, String clave, String rol) {

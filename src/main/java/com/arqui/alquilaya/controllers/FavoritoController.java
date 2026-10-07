@@ -12,7 +12,6 @@ import java.util.List;
 
 
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/alquilaya")
 @RequiredArgsConstructor
 public class FavoritoController {

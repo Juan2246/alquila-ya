@@ -3,6 +3,8 @@ package com.arqui.alquilaya.services;
 import com.arqui.alquilaya.dtos.CotizacionDTO;
 import com.arqui.alquilaya.dtos.PropiedadDTO;
 import com.arqui.alquilaya.entities.Propiedad;
+import com.arqui.alquilaya.entities.PropiedadClausula;
+import com.arqui.alquilaya.entities.PropiedadFoto;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -11,6 +13,10 @@ import java.util.List;
  * Define operaciones CRUD, consultas por propietario y buscador avanzado con filtros.
  */
 public interface PropiedadService {
+    Propiedad updateDTO(PropiedadDTO entrada);
+    PropiedadFoto agregarFoto(Long id, String url);
+    PropiedadClausula agregarClausula(Long id, String texto);
+    void eliminarClausula(Long propiedadId, Long clausulaId);
     public Propiedad add(Propiedad propiedad);
     public Propiedad findById(Long id);
     public List<Propiedad> listAll();

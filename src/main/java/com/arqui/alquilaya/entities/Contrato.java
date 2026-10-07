@@ -48,4 +48,12 @@ public class Contrato {
     @JsonIgnore
     @OneToMany(mappedBy = "contrato", fetch = FetchType.LAZY)
     private List<Pago> pagos;
+
+    @JsonIgnore
+    @OneToOne
+    @JoinColumn(name = "reserva_id", unique = true)
+    private Reserva reserva;
+
+    @Version
+    private Long version;
 }

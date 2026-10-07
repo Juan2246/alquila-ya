@@ -1,18 +1,18 @@
 package com.arqui.alquilaya.dtos;
 
+import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.util.List;
-
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class PropiedadDTO {
     private Long id;
+    @NotNull
     private String titulo;
     private String descripcion;
     private String ubicacion;
@@ -22,6 +22,7 @@ public class PropiedadDTO {
     private Integer capacidad;
     private Double latitud;
     private Double longitud;
+    @NotNull
     private Long propietarioId;
     // Campo derivado: nombre completo del propietario para mostrar en la respuesta
     private String propietarioNombre;

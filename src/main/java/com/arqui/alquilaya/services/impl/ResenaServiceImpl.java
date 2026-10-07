@@ -8,15 +8,16 @@ import com.arqui.alquilaya.entities.Reserva;
 import com.arqui.alquilaya.exceptions.ResourceNotFoundException;
 import com.arqui.alquilaya.repositories.ResenaRepository;
 import com.arqui.alquilaya.repositories.ReservaRepository;
+import com.arqui.alquilaya.security.AccesoActual;
 import com.arqui.alquilaya.services.ClienteService;
 import com.arqui.alquilaya.services.PropiedadService;
 import com.arqui.alquilaya.services.ResenaService;
 import jakarta.validation.ValidationException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implementación del servicio de reseñas.
@@ -25,10 +26,12 @@ import java.util.List;
  * La puntuación general se calcula automáticamente como el promedio de las 3 subcategorías.
  */
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ResenaServiceImpl implements ResenaService {
 
     private final ResenaRepository resenaRepository;
+    private final AccesoActual acceso;
 
     // Se inyecta ReservaRepository para la validación de reserva completada
     private final ReservaRepository reservaRepository;
@@ -36,6 +39,16 @@ public class ResenaServiceImpl implements ResenaService {
     private final ClienteService clienteService;
 
     private final PropiedadService propiedadService;
+
+    @Override
+    public Resena responder(Long id, String respuesta) {
+        Resena resena = resenaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Reseña no encontrada"));
+        acceso.exigirPropietario(resena.getPropiedad().getPropietario());
+        if (respuesta == null || respuesta.isBlank() || respuesta.length() > 2000)
+            throw new ValidationException("La respuesta debe tener entre 1 y 2000 caracteres");
+        resena.setRespuestaPropietario(respuesta.trim());
+        return resenaRepository.save(resena);
+    }
 
     @Override
     public Resena findById(Long id) {
@@ -68,6 +81,7 @@ public class ResenaServiceImpl implements ResenaService {
             throw new ResourceNotFoundException("Cliente con id: " + resenaDTO.getClienteId() + " no encontrado");
         }
 
+        acceso.exigirCliente(cliente);
         // Paso 2: Buscar la propiedad
         Propiedad propiedad = propiedadService.findById(resenaDTO.getPropiedadId());
 
@@ -121,7 +135,7 @@ public class ResenaServiceImpl implements ResenaService {
                 resenaDTO.getComentario(),
                 LocalDateTime.now(),
                 propiedad,
-                cliente
+                cliente, null
         );
 
         newResena = resenaRepository.save(newResena);
