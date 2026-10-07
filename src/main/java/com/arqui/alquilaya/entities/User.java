@@ -23,6 +23,7 @@ public class User {
     private Long id;
 
     // Nombre de usuario para el inicio de sesión (puede ser el correo electrónico)
+    @Column(unique = true, nullable = false)
     private String username;
 
     // Contraseña encriptada con BCrypt (nunca se almacena en texto plano).

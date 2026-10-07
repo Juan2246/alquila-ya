@@ -1,5 +1,8 @@
 package com.arqui.alquilaya.dtos;
 
+import com.arqui.alquilaya.entities.Cliente;
+import com.arqui.alquilaya.entities.Propietario;
+import com.arqui.alquilaya.entities.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
